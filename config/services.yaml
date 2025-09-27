@@ -1,0 +1,24 @@
+parameters: { }
+
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+
+  # alle Klassen in src/ automatisch als Services (außer Kernel)
+  App\:
+    resource: '../src/'
+    exclude:
+      - '../src/Kernel.php'
+
+  # FileMaker Client mit ENV-Argumenten
+  App\Service\FileMakerClient:
+    arguments:
+      $host: '%env(string:FM_HOST)%'
+      $db:   '%env(string:FM_DB)%'
+      $user: '%env(string:FM_USER)%'
+      $pass: '%env(string:FM_PASS)%'
+      
+  App\Service\NavService: ~
+  App\Twig\NavExtension:
+    tags: ['twig.extension']

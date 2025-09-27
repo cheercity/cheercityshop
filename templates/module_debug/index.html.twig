@@ -1,0 +1,26 @@
+{% extends 'base.html.twig' %}
+{% block title %}Module Debug{% endblock %}
+
+{% block body %}
+<h1>Module-Navigation (nach Gruppe/Modul)</h1>
+<nav style="font-size:1.1em;">
+    <ul style="list-style:none; padding:0;">
+        {% for modul, items in moduleGroups %}
+            <li style="margin-bottom:1em;">
+                <strong style="font-size:1.15em; color:#2a4a7b;">{{ modul }}</strong>
+                <ul style="margin:0.3em 0 0 1.5em;">
+                    {% for item in items %}
+                        <li style="margin:0.2em 0;">
+                            {% if item.lnk %}
+                                <a href="{{ item.lnk }}" style="color:#337ab7; text-decoration:underline;">{{ item.titel }}</a>
+                            {% else %}
+                                <span style="color:#222;">{{ item.titel }}</span>
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            </li>
+        {% endfor %}
+    </ul>
+</nav>
+{% endblock %}

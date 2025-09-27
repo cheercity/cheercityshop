@@ -1,0 +1,9 @@
+# PHP 8.4 via FPM-Socket (lima)
+<Files ~ "\.php$">
+  <If "-f %{REQUEST_FILENAME}">
+    SetHandler proxy:unix:/usr/share/lima/php-cheercity/php-fpm-84|fcgi://localhost-cheercity-php84
+  </If>
+</Files>
+
+# Sicherheit: keine Verzeichnisauflistung
+Options -Indexes

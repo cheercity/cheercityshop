@@ -1,0 +1,115 @@
+{% extends './layout/layout.html.twig' %}
+
+{% block content %}
+
+	{# Hero / Banner similar to home but minimal: keeps header/navigation visual context #}
+	{# Use cat_banner (FileMaker) as background image and cat_descr_h1 as headline when available #}
+	{% set banner_url = cat_banner is defined and cat_banner ? asset(cat_banner) : null %}
+	{% set banner_headline = cat_descr_h1 is defined and cat_descr_h1 ? cat_descr_h1 : (title ?: 'Menu') %}
+		<div class="banner banner-1 banner-9 bg-image" {% if banner_url %} style="background-image:url('{{ banner_url }}'); background-size:cover; background-position:center;" {% endif %}> <div class="container">
+			<div class="banner-inner">
+				<div class="row">
+					<div class="col-12 gutter-2">
+						<div class="slider-inner text-center" style="padding:4rem 0;">
+							<div class="contents">
+								<h1 class="product-title">{{ banner_headline }}</h1>
+								{% if slug is defined and slug %}
+									<p class="muted">Slug:
+										{{ slug }}</p>
+								{% endif %}
+								{% if alias is defined and alias %}
+									<p class="muted">Alias:
+										{{ alias }}</p>
+								{% elseif nav_fields.alias is defined and nav_fields.alias %}
+									<p class="muted">Alias:
+										{{ nav_fields.alias }}</p>
+								{% endif %}
+								{# Prefer the explicit controller-provided parent_id, fall back to raw nav_fields parent_ID #}
+								{% if parent_id is defined and parent_id %}
+									<p class="muted">Parent ID:
+										{{ parent_id }}</p>
+								{% elseif nav_fields.parent_ID is defined and nav_fields.parent_ID %}
+									<p class="muted">Parent ID:
+										{{ nav_fields.parent_ID }}</p>
+								{% elseif nav_fields.parentId is defined and nav_fields.parentId %}
+									<p class="muted">Parent ID:
+										{{ nav_fields.parentId }}</p>
+								{% elseif nav_fields.parentid is defined and nav_fields.parentid %}
+									<p class="muted">Parent ID:
+										{{ nav_fields.parentid }}</p>
+								{% endif %}
+								{# Category ID (controller-provided fallback + raw variants) #}
+								{% if category_id is defined and category_id %}
+									<p class="muted">Category ID:
+										{{ category_id }}</p>
+								{% elseif nav_fields.categroy_ID is defined and nav_fields.categroy_ID %}
+									<p class="muted">Category ID:
+										{{ nav_fields.categroy_ID }}</p>
+								{% elseif nav_fields.category_ID is defined and nav_fields.category_ID %}
+									<p class="muted">Category ID:
+										{{ nav_fields.category_ID }}</p>
+								{% elseif nav_fields.categoryId is defined and nav_fields.categoryId %}
+									<p class="muted">Category ID:
+										{{ nav_fields.categoryId }}</p>
+								{% endif %}
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	{# Main placeholder: intentionally minimal so menu pages show header/navigation/footer only #}
+	<main class="menu-main container my-5">
+		<div class="thanks-area">
+			<div class="container">
+				{% if nav_fields is defined and nav_fields is not empty %}
+					<section class="container my-4">
+						<h2>Nav fields (raw)</h2>
+						<pre style="background:#f6f8fa;padding:1rem;border:1px solid #e1e4e8;overflow:auto;">{{ nav_fields|json_encode(constant('JSON_PRETTY_PRINT'))|raw }}</pre>
+					</section>
+					{% else %}
+
+				{% endif %}
+
+				{# List all cat_descr_h1 values for entries that have a parent_ID #}
+				{% if children_headlines is defined and children_headlines|length > 0 %}
+					<section class="container my-4">
+						<h2>Child Headlines (cat_descr_h1)</h2>
+						<ol class="children-headlines" style="background:#fff;padding:1rem;border:1px solid #e1e4e8;">
+							{% for h in children_headlines %}
+								<li>{{ h }}</li>
+							{% endfor %}
+						</ol>
+					</section>
+				{% endif %}
+				<div class="section-icon">
+					<i class="fal fa-check"></i>
+				</div>
+				<div class="section-title">
+					<h2 class="sub-title">Thanks For your Order</h2>
+					<h3 class="sect-title">Sorry, we couldn't find the page you where looking for. We suggest that
+						<br>
+						you return to homepage.</h3>
+				</div>
+				<div class="section-button">
+					<a class="btn-1" href="{{ path('index') }}">
+						<i class="fal fa-long-arrow-left"></i>
+						Go To Homepage</a>
+					<h3>
+						Let's track your order or
+						<a class="btn-2" href="{{ path('contact') }}">
+							Contact Us</a>
+					</h3>
+				</div>
+			</div>
+		</div>
+	</div>
+</main>
+
+
+<!--thanks-area start--><!--thanks-area end-->
+
+
+{# Debug: show the raw nav_fields JSON returned from FileMaker for this menu entry #}{% endblock %}

@@ -1,0 +1,17 @@
+/* Modern Navigation CSS Scaffold */
+.nav__menu { display: flex; gap: 2.5rem; align-items: center; }
+.nav-item { position: relative; }
+.nav-link-wrap { display: flex; align-items: center; gap: .6rem; }
+.menu-item, .mm-link { display: inline-block; padding: .6rem 1.2rem; color: #222; font-weight: 700; text-decoration: none; border-radius: 4px; transition: background .2s; }
+.menu-item:hover, .mm-link:hover { background: #f5f5f5; }
+.submenu-toggle { background: none; border: none; padding: .25rem; margin-left: .35rem; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
+.submenu-toggle .icon { font-size: .9rem; }
+.dropdown-ul.level-1 { position: absolute; left: 0; top: calc(100% + 8px); display: none; min-width: 260px; background: #fff; padding: .6rem 0; border-radius: 6px; box-shadow: 0 14px 30px rgba(0,0,0,.12); z-index: 999; }
+.dropdown-ul.level-1 .nav-item { display: block; }
+.dropdown-ul.level-1 .menu-item { display: block; padding: .9rem 1.2rem; color: #222; font-weight: 700; }
+.dropdown-ul.level-2 { position: absolute; left: 100%; top: 0; min-width: 220px; display: none; background: #fff; padding: .4rem 0; border-radius: 6px; box-shadow: 0 14px 30px rgba(0,0,0,.12); }
+.nav-item.has-dropdown.open > .dropdown-ul.level-1 { display: block; }
+.nav-item.level-1.has-dropdown.open > .dropdown-ul.level-2 { display: block; }
+@media (hover: hover) and (pointer: fine) { .nav-item.has-dropdown:hover > .dropdown-ul.level-1 { display: block; } .dropdown-ul.level-1 .nav-item.has-dropdown:hover > .dropdown-ul.level-2 { display: block; } }
+@media (max-width: 991px) { .nav__menu { flex-direction: column; gap: 0; } .dropdown-ul { position: static; display: none; box-shadow: none; padding-left: 0; } .nav-item.has-dropdown.open > .dropdown-ul { display: block; } .menu-item, .mm-link { padding: .9rem 1rem; display: block; } .submenu-toggle { margin-left: auto; } }
+.dropdown-ul .menu-item { white-space: nowrap; }

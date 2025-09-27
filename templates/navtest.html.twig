@@ -1,0 +1,27 @@
+{% import 'partials/_nav_items.html.twig' as nav %}
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Navigation Test</title>
+        <link rel="stylesheet" href="/assets/css/rtsmenu.css">
+        <link rel="stylesheet" href="/assets/css/main.css">
+        <style>
+            body { font-family: 'Jost', sans-serif; background: #fafafa; }
+            .navtest-container { max-width: 1200px; margin: 2rem auto; background: #fff; border-radius: 8px; box-shadow: 0 6px 24px rgba(0,0,0,.08); padding: 2rem; }
+            h1 { font-size: 2rem; margin-bottom: 1.5rem; }
+        </style>
+</head>
+<body>
+<div class="navtest-container">
+    <h1>Navigation Demo</h1>
+    <nav class="nav__container">
+        <ul class="nav__menu" role="menubar">
+            {{ nav.render_items(items, 'menu-item', 'dropdown-ul', 0) }}
+        </ul>
+    </nav>
+</div>
+<script src="/assets/js/vendors/jquery-3.6.0.min.js"></script>
+<script src="/assets/js/navtest-dropdown.js"></script>
+</body>
+</html>

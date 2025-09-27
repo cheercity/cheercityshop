@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en" class="darkmode" data-theme="light">
+
+    {% include 'partials/head.html.twig' %}
+
+    <body>
+        {# Preloader Section #}
+        {% include 'partials/preloader.html.twig' %}
+        
+        <div class="anywere"></div>
+
+    
+        {% include 'partials/header.html.twig' %}
+
+
+        {% block content %}{% endblock %} 
+
+        {% if footer is defined %}
+            {% include 'partials/footer.html.twig' %}
+        {% endif %}
+
+        {% include 'partials/scroll.html.twig' %}
+
+        {% include 'partials/script.html.twig' %}
+
+    </body>
+</html>

@@ -1,0 +1,149 @@
+{
+  "info": {
+    "name": "FileMaker REST API - CHEERCITYshop",
+    "description": "FileMaker Data API Collection for CHEERCITYshop database",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "fm_host",
+      "value": "https://fms.cheercity-shop.de",
+      "type": "string"
+    },
+    {
+      "key": "fm_database",
+      "value": "CHEERCITYshop",
+      "type": "string"
+    },
+    {
+      "key": "fm_username",
+      "value": "eshopsym",
+      "type": "string"
+    },
+    {
+      "key": "fm_password",
+      "value": "T9kz#7Qv!pG2r$LfX8m@1Wc^eN4y*Jb",
+      "type": "string"
+    },
+    {
+      "key": "fm_token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Get Authentication Token",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (pm.response.code === 200) {",
+              "    const responseJson = pm.response.json();",
+              "    const token = responseJson.response.token;",
+              "    pm.collectionVariables.set('fm_token', token);",
+              "    console.log('Token saved: ' + token);",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Basic {{base64_credentials}}",
+            "description": "Base64 encoded username:password"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        },
+        "url": {
+          "raw": "{{fm_host}}/fmi/data/vLatest/databases/{{fm_database}}/sessions",
+          "host": ["{{fm_host}}"],
+          "path": ["fmi", "data", "vLatest", "databases", "{{fm_database}}", "sessions"]
+        },
+        "description": "Authenticate and get token for FileMaker Data API"
+      }
+    },
+    {
+      "name": "2. Find Records in sym_Module",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{fm_token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"query\": [\n    {\n      \"Published\": \"1\",\n      \"Footer_Status\": \"1\"\n    }\n  ],\n  \"limit\": 1000\n}"
+        },
+        "url": {
+          "raw": "{{fm_host}}/fmi/data/vLatest/databases/{{fm_database}}/layouts/sym_Module/_find",
+          "host": ["{{fm_host}}"],
+          "path": ["fmi", "data", "vLatest", "databases", "{{fm_database}}", "layouts", "sym_Module", "_find"]
+        },
+        "description": "Find all published modules with Footer_Status=1"
+      }
+    },
+    {
+      "name": "3. Find Records in sym_Navigation",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{fm_token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"query\": [\n    {\n      \"Status\": \"1\"\n    }\n  ],\n  \"limit\": 1000\n}"
+        },
+        "url": {
+          "raw": "{{fm_host}}/fmi/data/vLatest/databases/{{fm_database}}/layouts/sym_Navigation/_find",
+          "host": ["{{fm_host}}"],
+          "path": ["fmi", "data", "vLatest", "databases", "{{fm_database}}", "layouts", "sym_Navigation", "_find"]
+        },
+        "description": "Find all active navigation items"
+      }
+    },
+    {
+      "name": "4. Delete Session (Logout)",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{fm_token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{fm_host}}/fmi/data/vLatest/databases/{{fm_database}}/sessions/{{fm_token}}",
+          "host": ["{{fm_host}}"],
+          "path": ["fmi", "data", "vLatest", "databases", "{{fm_database}}", "sessions", "{{fm_token}}"]
+        },
+        "description": "Delete the session token (logout)"
+      }
+    }
+  ]
+}
