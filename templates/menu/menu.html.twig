@@ -84,6 +84,53 @@
 						</ol>
 					</section>
 				{% endif %}
+
+				{# Parent record preview: show key fields and raw JSON when available #}
+				{% if parent_fields is defined and parent_fields is not empty %}
+					<section class="container my-4">
+						<h2>Parent (parent_ID)</h2>
+						<div style="background:#fff;padding:1rem;border:1px solid #e1e4e8;">
+							{% if parent_fields.cat_title is defined and parent_fields.cat_title %}
+								<p>
+									<strong>Title:</strong>
+									{{ parent_fields.cat_title }}</p>
+							{% endif %}
+							{% if parent_fields.alias is defined and parent_fields.alias %}
+								<p>
+									<strong>Alias:</strong>
+									{{ parent_fields.alias }}</p>
+							{% endif %}
+							{% if parent_fields.cat_descr_h1 is defined and parent_fields.cat_descr_h1 %}
+								<p>
+									<strong>Headline (cat_descr_h1):</strong>
+									{{ parent_fields.cat_descr_h1 }}</p>
+							{% endif %}
+							<hr/>
+							<pre style="background:#f6f8fa;padding:1rem;border:1px solid #e1e4e8;overflow:auto;">{{ parent_fields|json_encode(constant('JSON_PRETTY_PRINT'))|raw }}</pre>
+						</div>
+					</section>
+				{% endif %}
+
+				{% if parent_records is defined and parent_records|length > 0 %}
+				<section class="container my-4">
+					<h2>Parent Records</h2>
+					<ul style="background:#fff;padding:1rem;border:1px solid #e1e4e8;">
+						{% for p in parent_records %}
+							<li style="margin-bottom:.5rem;">
+								{% set ptitle = p.cat_title is defined and p.cat_title ? p.cat_title : (p.title is defined and p.title ? p.title : '(no title)') %}
+								{% set palias = p.alias is defined and p.alias ? p.alias : null %}
+								<strong>{{ ptitle }}</strong>
+								{% if palias %}
+									— <a href="{{ path('menu_show', {'slug': palias}) }}">Open</a> ({{ palias }})
+								{% endif %}
+								{% if p.cat_descr_h1 is defined and p.cat_descr_h1 %}
+									<p class="muted">{{ p.cat_descr_h1 }}</p>
+								{% endif %}
+							</li>
+						{% endfor %}
+					</ul>
+				</section>
+				{% endif %}
 				<div class="section-icon">
 					<i class="fal fa-check"></i>
 				</div>
