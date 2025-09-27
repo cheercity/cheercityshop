@@ -10,23 +10,24 @@ final class NavService
         private FileMakerClient $fm,
         private CacheItemPoolInterface $cache,
         private string $navigationLayout = 'sym_Navigation',
-        private string $moduleLayout = 'sym_Module'
-    ) {}
+        private string $moduleLayout = 'sym_Module',
+    ) {
+    }
 
     public function getMenu(
-        string $layout = null,
+        ?string $layout = null,
         array $filter = ['Status' => '1'],
-        int $ttl = 300
+        int $ttl = 300,
     ): array {
         $layout = $layout ?: $this->navigationLayout;
-        $cacheKey = 'nav_main_' . md5(json_encode([$layout, $filter]));
+        $cacheKey = 'nav_main_'.md5(json_encode([$layout, $filter]));
         $item = $this->cache->getItem($cacheKey);
         if ($item->isHit()) {
             return $item->get();
         }
 
         $records = $this->fm->find($layout, $filter, ['limit' => 1000]);
-        $flat = array_map(fn($r) => $r['fieldData'] ?? [], $records);
+        $flat = array_map(fn ($r) => $r['fieldData'] ?? [], $records);
 
         // Detect if records use legacy cat_sort (AA BB CC) scheme
         $usesCatSort = false;
@@ -41,33 +42,37 @@ final class NavService
             // Build by cat_sort code (AA BB CC -> level 0/1/2)
             $byCode = [];
             foreach ($flat as $x) {
-                $catSortRaw = (string)($x['cat_sort'] ?? '');
+                $catSortRaw = (string) ($x['cat_sort'] ?? '');
                 $catSort = str_pad(preg_replace('/[^0-9]/', '', $catSortRaw), 6, '0', STR_PAD_RIGHT);
                 $aa = substr($catSort, 0, 2);
                 $bb = substr($catSort, 2, 2);
                 $cc = substr($catSort, 4, 2);
-                $code = $aa . $bb . $cc; // 6-digit code
+                $code = $aa.$bb.$cc; // 6-digit code
 
-                $label = trim((string)($x['cat_title'] ?? $x['title'] ?? $x['cat_descr_h1'] ?? '')) ?: '(ohne Titel)';
-                $href = trim((string)($x['cat_link'] ?? $x['link'] ?? '/')) ?: '/';
+                $label = trim((string) ($x['cat_title'] ?? $x['title'] ?? $x['cat_descr_h1'] ?? '')) ?: '(ohne Titel)';
+                $href = trim((string) ($x['cat_link'] ?? $x['link'] ?? '/')) ?: '/';
                 // Prefer alias-based internal menu links when no explicit external href is provided
-                $alias = trim((string)($x['alias'] ?? $x['Alias'] ?? ''));
-                if (($href === '' || $href === '/' || $href === '/menu') && $alias !== '') {
-                    $href = '/menu/' . $alias;
+                $alias = trim((string) ($x['alias'] ?? $x['Alias'] ?? ''));
+                if (('' === $href || '/' === $href || '/menu' === $href) && '' !== $alias) {
+                    $href = '/menu/'.$alias;
                 }
-                $id = (string)($x['categroy_ID'] ?? $x['category_ID'] ?? $code ?: uniqid('nav_', true));
-                $order = (int)($catSort);
+                $id = (string) ($x['categroy_ID'] ?? $x['category_ID'] ?? $code ?: uniqid('nav_', true));
+                $order = (int) $catSort;
 
                 $level = 0;
-                if ($bb !== '00' && $cc === '00') $level = 1;
-                if ($cc !== '00') $level = 2;
+                if ('00' !== $bb && '00' === $cc) {
+                    $level = 1;
+                }
+                if ('00' !== $cc) {
+                    $level = 2;
+                }
 
                 $byCode[$code] = [
                     'id' => $id,
                     'code' => $code,
                     'level' => $level,
                     'label' => $label,
-                    'cat_descr_h1' => isset($x['cat_descr_h1']) ? (string)$x['cat_descr_h1'] : null,
+                    'cat_descr_h1' => isset($x['cat_descr_h1']) ? (string) $x['cat_descr_h1'] : null,
                     'href' => $href,
                     'target' => '_self',
                     'order' => $order,
@@ -81,15 +86,15 @@ final class NavService
                 $aa = substr($code, 0, 2);
                 $bb = substr($code, 2, 2);
                 $cc = substr($code, 4, 2);
-                if ($node['level'] === 2) {
-                    $parentCode = $aa . $bb . '00';
+                if (2 === $node['level']) {
+                    $parentCode = $aa.$bb.'00';
                     if (isset($byCode[$parentCode])) {
                         $byCode[$parentCode]['children'][] = &$node;
                     } else {
                         $root[] = &$node;
                     }
-                } elseif ($node['level'] === 1) {
-                    $parentCode = $aa . '00' . '00';
+                } elseif (1 === $node['level']) {
+                    $parentCode = $aa.'0000';
                     if (isset($byCode[$parentCode])) {
                         $byCode[$parentCode]['children'][] = &$node;
                     } else {
@@ -103,7 +108,7 @@ final class NavService
 
             // sort recursively by 'order'
             $sortChildren = function (&$nodes) use (&$sortChildren) {
-                usort($nodes, fn($a, $b) => $a['order'] <=> $b['order']);
+                usort($nodes, fn ($a, $b) => $a['order'] <=> $b['order']);
                 foreach ($nodes as &$n) {
                     if (!empty($n['children'])) {
                         $sortChildren($n['children']);
@@ -117,7 +122,7 @@ final class NavService
             $normalizeHref = function (&$nodes) use (&$normalizeHref) {
                 foreach ($nodes as &$n) {
                     if (isset($n['href'])) {
-                        $h = trim((string)$n['href']);
+                        $h = trim((string) $n['href']);
                         if (preg_match('/^cat_01$/', $h)) {
                             $n['href'] = '/menu';
                         } elseif (preg_match('/^cat_02$/', $h)) {
@@ -135,39 +140,42 @@ final class NavService
             $item->set($root)->expiresAfter($ttl);
             $this->cache->save($item);
             $this->writeDiagnoseLog($layout, $filter, $ttl, $root);
+
             return $root;
         }
 
         // Fallback: parent_id based normalization
         $norm = array_map(function (array $x) {
-            $label = trim((string)($x['cat_title'] ?? $x['title'] ?? $x['cat_descr_h1'] ?? '')) ?: '(ohne Titel)';
-            $href  = trim((string)($x['cat_link'] ?? $x['link'] ?? ''));
+            $label = trim((string) ($x['cat_title'] ?? $x['title'] ?? $x['cat_descr_h1'] ?? '')) ?: '(ohne Titel)';
+            $href = trim((string) ($x['cat_link'] ?? $x['link'] ?? ''));
             // Prefer alias-based internal menu links when no explicit external href is provided
-            $alias = trim((string)($x['alias'] ?? $x['Alias'] ?? ''));
-            if ($href === '' && $alias !== '') {
-                $href = '/menu/' . $alias;
+            $alias = trim((string) ($x['alias'] ?? $x['Alias'] ?? ''));
+            if ('' === $href && '' !== $alias) {
+                $href = '/menu/'.$alias;
             }
-            if ($href === '') {
+            if ('' === $href) {
                 $href = '/';
             }
             $target = '_self';
 
             return [
-                'id'        => (string)($x['categroy_ID'] ?? $x['category_ID'] ?? ''),
-                'parent_id' => (string)($x['parent_ID'] ?? $x['parentId'] ?? ''),
-                'label'     => $label,
-                'cat_descr_h1' => isset($x['cat_descr_h1']) ? (string)$x['cat_descr_h1'] : null,
-                'href'      => $href,
-                'target'    => $target,
-                'order'     => (int)($x['cat_sort'] ?? 0),
+                'id' => (string) ($x['categroy_ID'] ?? $x['category_ID'] ?? ''),
+                'parent_id' => (string) ($x['parent_ID'] ?? $x['parentId'] ?? ''),
+                'label' => $label,
+                'cat_descr_h1' => isset($x['cat_descr_h1']) ? (string) $x['cat_descr_h1'] : null,
+                'href' => $href,
+                'target' => $target,
+                'order' => (int) ($x['cat_sort'] ?? 0),
             ];
         }, $flat);
 
-        usort($norm, fn($a, $b) => $a['order'] <=> $b['order']);
+        usort($norm, fn ($a, $b) => $a['order'] <=> $b['order']);
 
         $byId = [];
         foreach ($norm as $n) {
-            if (trim((string)$n['label']) === '') continue;
+            if ('' === trim((string) $n['label'])) {
+                continue;
+            }
             $n['children'] = [];
             $key = $n['id'] ?: uniqid('noid_', true);
             $byId[$key] = $n;
@@ -175,8 +183,8 @@ final class NavService
 
         $root = [];
         foreach ($byId as $id => &$n) {
-            $pid = (string)($n['parent_id'] ?? '');
-            if ($pid !== '' && $pid !== '0' && isset($byId[$pid])) {
+            $pid = (string) ($n['parent_id'] ?? '');
+            if ('' !== $pid && '0' !== $pid && isset($byId[$pid])) {
                 $byId[$pid]['children'][] = &$n;
             } else {
                 $root[] = &$n;
@@ -184,7 +192,7 @@ final class NavService
         }
 
         $sortChildren = function (&$nodes) use (&$sortChildren) {
-            usort($nodes, fn($a, $b) => $a['order'] <=> $b['order']);
+            usort($nodes, fn ($a, $b) => $a['order'] <=> $b['order']);
             foreach ($nodes as &$n) {
                 if (!empty($n['children'])) {
                     $sortChildren($n['children']);
@@ -197,7 +205,7 @@ final class NavService
         $normalizeHref = function (&$nodes) use (&$normalizeHref) {
             foreach ($nodes as &$n) {
                 if (isset($n['href'])) {
-                    $h = trim((string)$n['href']);
+                    $h = trim((string) $n['href']);
                     if (preg_match('/^cat_0[01]$/', $h)) {
                         $n['href'] = '/menu';
                     } elseif (preg_match('/^cat_02$/', $h)) {
@@ -232,9 +240,13 @@ final class NavService
             $walk = function (array $nodes, int $depth = 0) use (&$walk, &$stats) {
                 $stats['max_depth'] = max($stats['max_depth'], $depth);
                 foreach ($nodes as $n) {
-                    $stats['total']++;
-                    if (empty($n['id'])) $stats['missing_id']++;
-                    if (empty($n['href'])) $stats['missing_href']++;
+                    ++$stats['total'];
+                    if (empty($n['id'])) {
+                        ++$stats['missing_id'];
+                    }
+                    if (empty($n['href'])) {
+                        ++$stats['missing_href'];
+                    }
                     if (!empty($n['children'])) {
                         $walk($n['children'], $depth + 1);
                     }
@@ -242,18 +254,20 @@ final class NavService
             };
             $walk($tree, 0);
 
-            $logPath = dirname(__DIR__, 2) . '/var/log/nav_diagnose.log';
+            $logPath = dirname(__DIR__, 2).'/var/log/nav_diagnose.log';
             if (!is_dir(dirname($logPath))) {
                 @mkdir(dirname($logPath), 0775, true);
             }
 
             $json = json_encode($tree, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
             $maxLen = 20000;
-            if ($json === false) {
+            if (false === $json) {
                 $sample = 'unable to encode tree';
             } else {
                 $sample = mb_substr($json, 0, $maxLen);
-                if (mb_strlen($json) > $maxLen) $sample .= "\n... (truncated) ";
+                if (mb_strlen($json) > $maxLen) {
+                    $sample .= "\n... (truncated) ";
+                }
             }
 
             $entry = sprintf("[%s] nav_diagnose layout=%s ttl=%d stats=%s\nSAMPLE_JSON:\n%s\n\n", date('c'), $layout, $ttl, json_encode($stats), $sample);
@@ -294,18 +308,18 @@ final class NavService
             // This is more tolerant than strict equality but still deterministic and avoids duplicates.
             foreach ($rows as $row) {
                 // Only include published rows
-                $publishedRaw = strtolower(trim((string)($row['Published'] ?? $row['published'] ?? $row['PUBLISHED'] ?? '')));
+                $publishedRaw = strtolower(trim((string) ($row['Published'] ?? $row['published'] ?? $row['PUBLISHED'] ?? '')));
                 if (!in_array($publishedRaw, ['1', 'true', 'yes'], true)) {
                     continue;
                 }
 
-                $modulRaw = trim((string)($row['Modul'] ?? ''));
-                $linkRaw = trim((string)($row['link'] ?? $row['lnk'] ?? $row['cat_link'] ?? ''));
+                $modulRaw = trim((string) ($row['Modul'] ?? ''));
+                $linkRaw = trim((string) ($row['link'] ?? $row['lnk'] ?? $row['cat_link'] ?? ''));
 
                 // Normalize: lowercase and remove punctuation to allow fuzzy substring checks
                 $modulNorm = strtolower(preg_replace('/[^a-z0-9\s]/i', ' ', $modulRaw));
-                $linkNorm  = strtolower(preg_replace('/[^a-z0-9\s\.\-]/i', ' ', $linkRaw));
-                $hay = trim($modulNorm . ' ' . $linkNorm);
+                $linkNorm = strtolower(preg_replace('/[^a-z0-9\s\.\-]/i', ' ', $linkRaw));
+                $hay = trim($modulNorm.' '.$linkNorm);
 
                 $placed = false;
 
@@ -334,14 +348,13 @@ final class NavService
             // Sort each column by Sortorder
             foreach ($footerCols as $k => $items) {
                 usort($items, function ($a, $b) {
-                    return (int)($a['Sortorder'] ?? 0) <=> (int)($b['Sortorder'] ?? 0);
+                    return (int) ($a['Sortorder'] ?? 0) <=> (int) ($b['Sortorder'] ?? 0);
                 });
                 $footerCols[$k] = $items;
             }
 
-
             // Only write to cache when ttl > 0
-            if ($ttl > 0 && $item !== null) {
+            if ($ttl > 0 && null !== $item) {
                 $item->set($footerCols);
                 $item->expiresAfter($ttl);
                 $this->cache->save($item);
@@ -372,20 +385,24 @@ final class NavService
 
             $groups = [];
             foreach ($rows as $row) {
-                $publishedRaw = strtolower(trim((string)($row['Published'] ?? $row['published'] ?? $row['PUBLISHED'] ?? '')));
+                $publishedRaw = strtolower(trim((string) ($row['Published'] ?? $row['published'] ?? $row['PUBLISHED'] ?? '')));
                 if (!in_array($publishedRaw, ['1', 'true', 'yes'], true)) {
                     continue;
                 }
-                $modul = trim((string)($row['Modul'] ?? '(kein Modul)'));
-                if ($modul === '') $modul = '(kein Modul)';
-                if (!isset($groups[$modul])) $groups[$modul] = [];
+                $modul = trim((string) ($row['Modul'] ?? '(kein Modul)'));
+                if ('' === $modul) {
+                    $modul = '(kein Modul)';
+                }
+                if (!isset($groups[$modul])) {
+                    $groups[$modul] = [];
+                }
                 $groups[$modul][] = $row;
             }
 
             // Sort each group by Sortorder (numeric)
             foreach ($groups as $k => $items) {
                 usort($items, function ($a, $b) {
-                    return (int)($a['Sortorder'] ?? 0) <=> (int)($b['Sortorder'] ?? 0);
+                    return (int) ($a['Sortorder'] ?? 0) <=> (int) ($b['Sortorder'] ?? 0);
                 });
                 $groups[$k] = $items;
             }
