@@ -1,0 +1,29 @@
+{% extends 'base.html.twig' %}
+{% block title %}Runtime Panel {{ label }}{% endblock %}
+{% block body %}
+<div class="container" style="max-width:900px; margin:2rem auto; font-family: system-ui, Arial, sans-serif;">
+    <h1>{{ label }} <small style="font-size:0.6em; font-weight:normal;">({{ key }})</small></h1>
+    <p><a href="{{ path('debug_runtime_index') }}">&larr; Zurück</a> | <a href="{{ path('debug_runtime_panel', {key:key}) }}?format=json">JSON</a></p>
+    <pre style="font-size:0.75rem; background:#272822; color:#eee; padding:1rem; overflow:auto;">{{ result|json_encode(constant('JSON_PRETTY_PRINT')) }}</pre>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+    (function(){
+        try {
+            const panel = {{ {'key': key, 'label': label, 'result': result}|json_encode(constant('JSON_UNESCAPED_SLASHES'))|raw }};
+            if (window && window.console) {
+                console.group('%cRuntime Panel: ' + panel.key,'background:#222;color:#ff0;padding:2px 6px;border-radius:3px');
+                console.log('Label:', panel.label);
+                console.dir(panel.result);
+                if (!window.RUNTIME_DEBUG) window.RUNTIME_DEBUG = { panels:{} };
+                window.RUNTIME_DEBUG.panels = window.RUNTIME_DEBUG.panels || {};
+                window.RUNTIME_DEBUG.panels[panel.key] = panel;
+                console.groupEnd();
+            }
+        } catch(e) { console.warn('Runtime panel console output failed', e); }
+    })();
+    </script>
+{% endblock %}

@@ -1,0 +1,8 @@
+{
+    "recommendations": [
+        "ritwickdey.live-sass",
+        "shinnn.stylelint",
+        "sleistner.vscode-fileutils"
+    ],
+    "unwantedRecommendations": []
+}

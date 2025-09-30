@@ -17,8 +17,8 @@ final class MenuController extends AbstractController
         $fields = [];
         try {
             if ($slug) {
-                // Try an exact-match lookup on multiple candidate slug fields until we find a record.
-                $slugCandidates = ['alias', 'Alias', 'direct_link_SEO', 'direct_link_seo', 'cat_alias', 'cat_title'];
+                // Slug must match the FileMaker 'alias' field exclusively (case tolerant)
+                $slugCandidates = ['alias', 'Alias'];
                 $res = ['response' => ['data' => []]];
                 foreach ($slugCandidates as $sfield) {
                     try {
@@ -28,10 +28,20 @@ final class MenuController extends AbstractController
                         continue;
                     }
                     $candidateRows = $candidateRes['response']['data'] ?? [];
-                    if (!empty($candidateRows)) {
+                    // filter rows to only include records where Status == 1
+                    $filtered = [];
+                    foreach ($candidateRows as $row) {
+                        $fd = $row['fieldData'] ?? [];
+                        $status = $fd['Status'] ?? $fd['status'] ?? null;
+                        if ((string) $status === '1' || (int) $status === 1) {
+                            $filtered[] = $row;
+                        }
+                    }
+                    if (!empty($filtered)) {
+                        $candidateRes['response']['data'] = $filtered;
                         $res = $candidateRes;
                         // record found for this slug field; stop searching
-                        @file_put_contents(__DIR__.'/../../var/log/legacy-debug-fm.log', date('c')." Slug lookup: matched field={$sfield} for slug={$slug}".PHP_EOL, FILE_APPEND | LOCK_EX);
+                        @file_put_contents(__DIR__.'/../../var/log/legacy-debug-fm.log', date('c')." Slug lookup: matched field={$sfield} for slug={$slug} (status=1)".PHP_EOL, FILE_APPEND | LOCK_EX);
                         break;
                     }
                 }
@@ -67,6 +77,7 @@ final class MenuController extends AbstractController
 
         // Normalize and extract category id (several possible spellings in FM)
         $categoryId = null;
+        // try the legacy misspelled field first to avoid FileMaker 'Field is missing' errors
         foreach (['categroy_ID', 'category_ID', 'categoryId', 'category_id', 'Category_ID'] as $k) {
             if (isset($fields[$k]) && '' !== (string) $fields[$k]) {
                 $categoryId = (string) $fields[$k];
@@ -81,7 +92,8 @@ final class MenuController extends AbstractController
         $parentFields = [];
         if (null !== $parentId && '' !== $parentId) {
             $triedCandidates = [];
-            $categoryCandidates = ['category_ID', 'categroy_ID', 'categoryId', 'category_id', 'Category_ID'];
+            // prefer the legacy (actual) field name used in the FileMaker layout
+            $categoryCandidates = ['categroy_ID', 'category_ID', 'categoryId', 'category_id', 'Category_ID'];
             foreach ($categoryCandidates as $field) {
                 try {
                     $res = $fm->find('sym_Navigation', [[$field => '=='.$parentId]], ['limit' => 50]);
@@ -94,12 +106,19 @@ final class MenuController extends AbstractController
                 $triedCandidates[] = $field;
                 if (!empty($rows)) {
                     foreach ($rows as $r) {
-                        if (isset($r['fieldData'])) {
-                            $parentRecords[] = $r['fieldData'];
+                        if (!isset($r['fieldData'])) {
+                            continue;
                         }
+                        $fd = $r['fieldData'];
+                        $status = $fd['Status'] ?? $fd['status'] ?? null;
+                        if ((string) $status !== '1' && (int) $status !== 1) {
+                            // skip inactive records
+                            continue;
+                        }
+                        $parentRecords[] = $fd;
                     }
                     // log which candidate returned results
-                    @file_put_contents(__DIR__.'/../../var/log/legacy-debug-fm.log', date('c')." Parent find: matched field={$field} for parentId={$parentId}, found=".count($parentRecords).PHP_EOL, FILE_APPEND | LOCK_EX);
+                    @file_put_contents(__DIR__.'/../../var/log/legacy-debug-fm.log', date('c')." Parent find: matched field={$field} for parentId={$parentId}, found=".count($parentRecords)." (status=1 filtered)".PHP_EOL, FILE_APPEND | LOCK_EX);
                     break;
                 }
             }
@@ -110,9 +129,15 @@ final class MenuController extends AbstractController
                     $parentRes = $fm->getRecord('sym_Navigation', (string) $parentId);
                     $pRows = $parentRes['response']['data'] ?? [];
                     foreach ($pRows as $r) {
-                        if (isset($r['fieldData'])) {
-                            $parentRecords[] = $r['fieldData'];
+                        if (!isset($r['fieldData'])) {
+                            continue;
                         }
+                        $fd = $r['fieldData'];
+                        $status = $fd['Status'] ?? $fd['status'] ?? null;
+                        if ((string) $status !== '1' && (int) $status !== 1) {
+                            continue;
+                        }
+                        $parentRecords[] = $fd;
                     }
                     if (!empty($parentRecords)) {
                         @file_put_contents(__DIR__.'/../../var/log/legacy-debug-fm.log', date('c')." Parent getRecord matched parentId={$parentId}".PHP_EOL, FILE_APPEND | LOCK_EX);
@@ -126,11 +151,51 @@ final class MenuController extends AbstractController
 
             // for backward compatibility expose the first matching record as parent_fields
             if (!empty($parentRecords)) {
+                // Normalize image fields for templates: ensure a single 'cat_image' string per parent
+                foreach ($parentRecords as &$pr) {
+                    if (!is_array($pr)) {
+                        continue;
+                    }
+                    $img = null;
+                    // direct field
+                    if (!empty($pr['cat_image'])) {
+                        $img = (string) $pr['cat_image'];
+                    }
+                    // try plural field or other variants
+                    if (null === $img && !empty($pr['cat_images'])) {
+                        $imgs = $pr['cat_images'];
+                        if (is_string($imgs)) {
+                            $trim = trim($imgs);
+                            // JSON list?
+                            if (str_starts_with($trim, '[') || str_starts_with($trim, '{')) {
+                                $decoded = json_decode($trim, true);
+                                if (json_last_error() === JSON_ERROR_NONE && is_array($decoded) && !empty($decoded)) {
+                                    $img = (string) reset($decoded);
+                                }
+                            }
+                            // fallback: comma-separated list
+                            if (null === $img) {
+                                $parts = preg_split('/\s*,\s*/', $trim);
+                                if (!empty($parts)) {
+                                    $img = (string) $parts[0];
+                                }
+                            }
+                        } elseif (is_array($imgs) && !empty($imgs)) {
+                            $img = (string) reset($imgs);
+                        }
+                    }
+                    // final assignment if we found an image
+                    if ($img) {
+                        $pr['cat_image'] = $img;
+                    }
+                }
+                unset($pr);
+
                 $parentFields = $parentRecords[0];
             }
         }
 
-        // Normalize and extract category id (several possible spellings in FM)
+        // (redundant extraction kept for safety) Ensure we still prefer legacy field first
         $categoryId = null;
         foreach (['categroy_ID', 'category_ID', 'categoryId', 'category_id', 'Category_ID'] as $k) {
             if (isset($fields[$k]) && '' !== (string) $fields[$k]) {
@@ -139,20 +204,19 @@ final class MenuController extends AbstractController
             }
         }
 
-        // Extract alias (used for routing). Try common variants and fall back to slug if present.
+        // Extract alias (used for routing). Use the FileMaker 'alias' field exclusively (case tolerant).
         $alias = null;
-        foreach (['alias', 'Alias', 'direct_link_SEO', 'direct_link_seo', 'cat_alias', 'cat_title'] as $k) {
+        foreach (['alias', 'Alias'] as $k) {
             if (isset($fields[$k]) && '' !== (string) $fields[$k]) {
                 $alias = (string) $fields[$k];
                 break;
             }
         }
-        if (null === $alias && $slug) {
-            $alias = $slug;
-        }
 
         // Collect cat_descr_h1 values from child records where parent_ID == categoryId
+        // Also collect full child records so templates can display images and links
         $childrenHeadlines = [];
+        $childrenRecords = [];
         if ($categoryId) {
             try {
                 // try matching the parent field exactly against categoryId
@@ -168,6 +232,16 @@ final class MenuController extends AbstractController
                     if (!empty($rows)) {
                         foreach ($rows as $r) {
                             $fd = $r['fieldData'] ?? [];
+                            if (empty($fd)) {
+                                continue;
+                            }
+                            $status = $fd['Status'] ?? $fd['status'] ?? null;
+                            if ((string) $status !== '1' && (int) $status !== 1) {
+                                // skip inactive child records
+                                continue;
+                            }
+                            // collect full child record for templates
+                            $childrenRecords[] = $fd;
                             $headline = trim((string) ($fd['cat_descr_h1'] ?? ''));
                             if ('' === $headline) {
                                 $headline = trim((string) ($fd['cat_descr_h'] ?? ''));
@@ -185,6 +259,42 @@ final class MenuController extends AbstractController
                     @file_put_contents(__DIR__.'/../../var/log/legacy-debug-fm.log', date('c')." Children find: no children for categoryId={$categoryId} (tried: ".implode(',', $parentFieldCandidates).')'.PHP_EOL, FILE_APPEND | LOCK_EX);
                 }
                 $childrenHeadlines = array_values(array_unique($childrenHeadlines));
+                // Normalize child images similar to parents: ensure a single 'cat_image' per child
+                if (!empty($childrenRecords)) {
+                    foreach ($childrenRecords as &$cr) {
+                        if (!is_array($cr)) {
+                            continue;
+                        }
+                        $img = null;
+                        if (!empty($cr['cat_image'])) {
+                            $img = (string) $cr['cat_image'];
+                        }
+                        if (null === $img && !empty($cr['cat_images'])) {
+                            $imgs = $cr['cat_images'];
+                            if (is_string($imgs)) {
+                                $trim = trim($imgs);
+                                if (str_starts_with($trim, '[') || str_starts_with($trim, '{')) {
+                                    $decoded = json_decode($trim, true);
+                                    if (json_last_error() === JSON_ERROR_NONE && is_array($decoded) && !empty($decoded)) {
+                                        $img = (string) reset($decoded);
+                                    }
+                                }
+                                if (null === $img) {
+                                    $parts = preg_split('/\s*,\s*/', $trim);
+                                    if (!empty($parts)) {
+                                        $img = (string) $parts[0];
+                                    }
+                                }
+                            } elseif (is_array($imgs) && !empty($imgs)) {
+                                $img = (string) reset($imgs);
+                            }
+                        }
+                        if ($img) {
+                            $cr['cat_image'] = $img;
+                        }
+                    }
+                    unset($cr);
+                }
             } catch (\Throwable $e) {
                 $childrenHeadlines = [];
             }
@@ -200,8 +310,10 @@ final class MenuController extends AbstractController
             // explicit convenience variable for templates
             'parent_id' => $parentId,
             'parent_fields' => $parentFields,
+            'parent_records' => $parentRecords,
             'category_id' => $categoryId,
             'alias' => $alias,
+            'children_records' => $childrenRecords,
             // list of cat_descr_h1 for records that have a parent_ID
             'children_headlines' => $childrenHeadlines,
         ]);

@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Controller;
 
 use App\Service\NavService;
@@ -12,6 +13,7 @@ class NavTestController extends AbstractController
     public function index(NavService $nav): Response
     {
         $items = $nav->getMenu('sym_Navigation', ['Status' => '1'], 300);
+
         return $this->render('navtest.html.twig', [
             'items' => $items,
         ]);

@@ -1,0 +1,113 @@
+<!-- ..::Jquery latest version::.. -->
+<script src="{{ asset('/assets/js/vendors/jquery-3.6.0.min.js') }}"></script>
+<!-- ..::Bootstrap latest version::.. -->
+<script src="{{ asset('/assets/js/vendors/bootstrap.min.js') }}"></script>
+<!-- ..::Wow.js::.. -->
+<script src="{{ asset('/assets/js/vendors/wow.min.js') }}"></script>
+<!-- ..::Swiper Slider::.. -->
+<script src="{{ asset('/assets/js/vendors/swiper-bundle.min.js') }}"></script>
+<!-- ..::Nice Select::.. -->
+<script src="{{ asset('/assets/js/vendors/jquery.nice-select.js') }}"></script>
+<!-- ..::metisMenu Plugin::.. -->
+{% if script is defined and script %}
+	{% if script is iterable %}
+		{% for path in script %}
+			<script src="{{ asset(path) }}?v={{ asset_version }}"></script>
+		{% endfor %}
+	{% else %}
+		{{ script|raw }}
+	{% endif %}
+{% endif %}
+<script src="{{ asset('/assets/js/vendors/metisMenu.min.js') }}"></script>
+<!-- ..::Main Menu Plugin::.. -->
+<script src="{{ asset('/assets/js/vendors/rtsmenu.js') }}"></script>
+<!-- ..::Magnefic Popup Plugin::.. -->
+<script src="{{ asset('/assets/js/vendors/isotope.pkgd.min.js') }}"></script>
+<!-- ..::Magnefic Popup Plugin::.. -->
+<script src="{{ asset('/assets/js/vendors/jquery.magnific-popup.min.js') }}"></script>
+<!-- ..::Main Script::.. -->
+<script src="{{ asset('/assets/js/main.js') }}"></script>
+<!-- ..::Modern Search Enhancement::.. -->
+<script src="{{ asset('/assets/js/modern-search.js') }}"></script>
+<script>
+	(function () {
+if (typeof Swiper === 'undefined') 
+return;
+
+
+// Generic initializer for common sliders (no autoplay, arrows visible when provided)
+document.querySelectorAll('.rts-cmmnSlider-over, .rts-cmmnSlider-over2, .rts-cmmnSlider-over3').forEach(function (el) {
+var parent = el.parentNode;
+var navNext = parent.querySelector('.slider-buttons .button-next') || parent.querySelector('.swiper-button-next') || null;
+var navPrev = parent.querySelector('.slider-buttons .button-prev') || parent.querySelector('.swiper-button-prev') || null;
+new Swiper(el, {
+slidesPerView: 4,
+spaceBetween: 20,
+loop: false,
+autoplay: false,
+pagination: {
+el: parent.querySelector('.swiper-pag') || el.querySelector('.swiper-pag') || null,
+clickable: true
+},
+navigation: {
+nextEl: navNext,
+prevEl: navPrev
+},
+breakpoints: {
+0: {
+slidesPerView: 1
+},
+576: {
+slidesPerView: 2
+},
+768: {
+slidesPerView: 3
+},
+992: {
+slidesPerView: 4
+}
+}
+});
+});
+
+// Initialize our CMD row sliders (cmd-slider-1 .. cmd-slider-6)
+for (var i = 1; i <= 6; i++) {
+var selector = '.cmd-slider-' + i;
+document.querySelectorAll(selector).forEach(function (el) {
+var parent = el.parentNode;
+var navNext = parent.querySelector('.slider-buttons .button-next') || parent.querySelector('.swiper-button-next') || null;
+var navPrev = parent.querySelector('.slider-buttons .button-prev') || parent.querySelector('.swiper-button-prev') || null;
+new Swiper(el, {
+slidesPerView: 4,
+spaceBetween: 18,
+loop: false,
+autoplay: false,
+pagination: {
+el: parent.querySelector('.swiper-pag') || el.querySelector('.swiper-pag') || null,
+clickable: true
+},
+navigation: {
+nextEl: navNext,
+prevEl: navPrev
+},
+breakpoints: {
+0: {
+slidesPerView: 1
+},
+576: {
+slidesPerView: 2
+},
+768: {
+slidesPerView: 3
+},
+992: {
+slidesPerView: 4
+}
+}
+});
+});
+}
+})();
+</script>
+{# Allow pages to append inline scripts; child templates can override/extend this block #}
+{% block javascripts %}{% endblock %}

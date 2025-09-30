@@ -1,0 +1,8 @@
+parameters:
+  app_debug:
+    default_panels: ['session','customer','cart']
+    panels:
+      session: true
+      customer: true
+      cart: true
+    allow_prod: false

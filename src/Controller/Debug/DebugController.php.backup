@@ -1,0 +1,84 @@
+<?php
+namespa        $modules = [
+            [
+                'name' => 'Auth Debug',
+                'description' => 'FileMaker Authentifizierung Schritt-für-Schritt testen',
+                'route' => 'debug_auth_debug',
+                'icon' => 'fas fa-key',
+                'color' => 'warning'
+            ],
+            [
+                'name' => 'Module Debug',
+                'description' => 'Zeigt alle Module aus sym_Module nach Gruppen sortiert',
+                'route' => 'debug_module',
+                'icon' => 'fas fa-puzzle-piece',
+                'color' => 'primary'
+            ],ontroller\Debug;
+
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Annotation\Route;
+
+#[Route('/debug', name: 'debug_')]
+class DebugController extends AbstractController
+{
+    #[Route('/', name: 'index')]
+    public function index(): Response
+    {
+        $debugModules = [
+            [
+                'name' => 'Module Debug',
+                'description' => 'Zeigt alle Module aus sym_Module nach Gruppen sortiert',
+                'route' => 'debug_module',
+                'icon' => 'fas fa-puzzle-piece',
+                'color' => 'primary'
+            ],
+            [
+                'name' => 'Banner Debug',
+                'description' => 'Zeigt alle aktiven Banner aus sym_Banner nach Position gruppiert',
+                'route' => 'debug_banner', 
+                'icon' => 'fas fa-image',
+                'color' => 'success'
+            ],
+            [
+                'name' => 'Navigation Debug',
+                'description' => 'Navigation und Menüstruktur aus sym_Navigation analysieren',
+                'route' => 'debug_navigation',
+                'icon' => 'fas fa-sitemap',
+                'color' => 'info'
+            ],
+            [
+                'name' => 'Content Debug',
+                'description' => 'CMS Inhalte und Seiten aus sym_Pages verwalten',
+                'route' => 'debug_content',
+                'icon' => 'fas fa-file-alt',
+                'color' => 'warning'
+            ],
+            [
+                'name' => 'Product Debug',
+                'description' => 'Produkte und Kategorien aus sym_Products anzeigen',
+                'route' => 'debug_products',
+                'icon' => 'fas fa-shopping-cart',
+                'color' => 'secondary'
+            ],
+            [
+                'name' => 'User Debug',
+                'description' => 'Benutzer und Rollen aus sym_Users verwalten',
+                'route' => 'debug_users',
+                'icon' => 'fas fa-users',
+                'color' => 'dark'
+            ],
+            [
+                'name' => 'Cache Management',
+                'description' => 'Cache leeren und Informationen anzeigen',
+                'route' => 'debug_cache_info',
+                'icon' => 'fas fa-database',
+                'color' => 'danger'
+            ]
+        ];
+
+        return $this->render('debug/index.html.twig', [
+            'modules' => $debugModules
+        ]);
+    }
+}

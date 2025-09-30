@@ -1,0 +1,39 @@
+{
+  "editor.formatOnSave": true,
+  "files.autoSave": "off",
+  // Live Sass Compiler settings: produce expanded and compressed CSS into public/assets/css
+  "liveSassCompile.settings.formats": [
+    {
+      "format": "expanded",
+      "extensionName": ".css",
+      "savePath": "public/assets/css"
+    },
+    {
+      "format": "compressed",
+      "extensionName": ".min.css",
+      "savePath": "public/assets/css"
+    }
+  ],
+  "liveSassCompile.settings.generateMap": false,
+  "liveSassCompile.settings.autoprefix": [
+    "> 1%",
+    "last 2 versions"
+  ],
+  "liveSassCompile.settings.excludeList": [
+    "**/node_modules/**",
+    ".vscode/**"
+  ],
+  "php-cs-fixer.executablePath": "${workspaceFolder}/vendor/bin/php-cs-fixer"
+}
+/*
+ If you see "php CS Fixer: executablePath not found" in VS Code, set the path to the php-cs-fixer PHAR
+ or the composer-installed binary. Recommended (project-local Composer):
+  "php-cs-fixer.executablePath": "${workspaceFolder}/vendor/bin/php-cs-fixer"
+
+If you prefer the bundled PHAR from the extension, use:
+  "php-cs-fixer.executablePath": "${extensionPath}/php-cs-fixer.phar"
+
+Place a downloaded php-cs-fixer.phar into the extension folder or install php-cs-fixer via Composer:
+  composer require --dev friendsofphp/php-cs-fixer
+
+*/

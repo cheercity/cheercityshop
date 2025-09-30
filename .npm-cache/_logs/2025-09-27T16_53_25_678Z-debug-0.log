@@ -1,0 +1,218 @@
+0 verbose cli /usr/local/bin/node /usr/local/bin/npm
+1 info using npm@10.8.2
+2 info using node@v18.20.8
+3 silly config load:file:/usr/local/lib/node_modules/npm/npmrc
+4 silly config load:file:/Users/holgeradmin/Documents/symfoni/.npmrc
+5 silly config load:file:/Users/holgeradmin/.npmrc
+6 silly config load:file:/usr/local/etc/npmrc
+7 verbose title npm ci
+8 verbose argv "ci" "--cache" "/Users/holgeradmin/Documents/symfoni/.npm-cache" "--no-audit" "--progress" "false"
+9 verbose logfile logs-max:10 dir:/Users/holgeradmin/Documents/symfoni/.npm-cache/_logs/2025-09-27T16_53_25_678Z-
+10 verbose logfile /Users/holgeradmin/Documents/symfoni/.npm-cache/_logs/2025-09-27T16_53_25_678Z-debug-0.log
+11 silly packumentCache heap:4345298944 maxSize:1086324736 maxEntrySize:543162368
+12 silly logfile done cleaning log files
+13 silly idealTree buildDeps
+14 silly fetch manifest onchange@^7.1.0
+15 silly packumentCache full:https://registry.npmjs.org/onchange cache-miss
+16 http fetch GET 200 https://registry.npmjs.org/onchange 157ms (cache miss)
+17 silly packumentCache full:https://registry.npmjs.org/onchange set size:undefined disposed:false
+18 silly placeDep ROOT onchange@7.1.0 OK for: cheercity-symfony-app@1.0.0 want: ^7.1.0
+19 silly fetch manifest @blakeembrey/deque@^1.0.5
+20 silly packumentCache full:https://registry.npmjs.org/@blakeembrey%2fdeque cache-miss
+21 silly fetch manifest @blakeembrey/template@^1.0.0
+22 silly packumentCache full:https://registry.npmjs.org/@blakeembrey%2ftemplate cache-miss
+23 silly fetch manifest arg@^4.1.3
+24 silly packumentCache full:https://registry.npmjs.org/arg cache-miss
+25 silly fetch manifest chokidar@^3.3.1
+26 silly packumentCache full:https://registry.npmjs.org/chokidar cache-miss
+27 silly fetch manifest cross-spawn@^7.0.1
+28 silly packumentCache full:https://registry.npmjs.org/cross-spawn cache-miss
+29 silly fetch manifest ignore@^5.1.4
+30 silly packumentCache full:https://registry.npmjs.org/ignore cache-miss
+31 silly fetch manifest tree-kill@^1.2.2
+32 silly packumentCache full:https://registry.npmjs.org/tree-kill cache-miss
+33 http fetch GET 200 https://registry.npmjs.org/npm 197ms
+34 http fetch GET 200 https://registry.npmjs.org/@blakeembrey%2fdeque 71ms (cache miss)
+35 silly packumentCache full:https://registry.npmjs.org/@blakeembrey%2fdeque set size:undefined disposed:false
+36 http fetch GET 200 https://registry.npmjs.org/chokidar 134ms (cache miss)
+37 silly packumentCache full:https://registry.npmjs.org/chokidar set size:undefined disposed:false
+38 http fetch GET 200 https://registry.npmjs.org/@blakeembrey%2ftemplate 143ms (cache miss)
+39 silly packumentCache full:https://registry.npmjs.org/@blakeembrey%2ftemplate set size:undefined disposed:false
+40 http fetch GET 200 https://registry.npmjs.org/arg 143ms (cache miss)
+41 silly packumentCache full:https://registry.npmjs.org/arg set size:undefined disposed:false
+42 http fetch GET 200 https://registry.npmjs.org/ignore 155ms (cache miss)
+43 silly packumentCache full:https://registry.npmjs.org/ignore set size:undefined disposed:false
+44 http fetch GET 200 https://registry.npmjs.org/tree-kill 164ms (cache miss)
+45 silly packumentCache full:https://registry.npmjs.org/tree-kill set size:undefined disposed:false
+46 http fetch GET 200 https://registry.npmjs.org/cross-spawn 169ms (cache miss)
+47 silly packumentCache full:https://registry.npmjs.org/cross-spawn set size:undefined disposed:false
+48 silly placeDep ROOT @blakeembrey/deque@1.0.5 OK for: onchange@7.1.0 want: ^1.0.5
+49 silly placeDep ROOT @blakeembrey/template@1.2.0 OK for: onchange@7.1.0 want: ^1.0.0
+50 silly placeDep ROOT arg@4.1.3 OK for: onchange@7.1.0 want: ^4.1.3
+51 silly placeDep node_modules/onchange chokidar@3.6.0 OK for: onchange@7.1.0 want: ^3.3.1
+52 silly placeDep ROOT cross-spawn@7.0.6 OK for: onchange@7.1.0 want: ^7.0.1
+53 silly placeDep ROOT ignore@5.3.2 OK for: onchange@7.1.0 want: ^5.1.4
+54 silly placeDep ROOT tree-kill@1.2.2 OK for: onchange@7.1.0 want: ^1.2.2
+55 silly fetch manifest anymatch@~3.1.2
+56 silly packumentCache full:https://registry.npmjs.org/anymatch cache-miss
+57 silly fetch manifest readdirp@~3.6.0
+58 silly packumentCache full:https://registry.npmjs.org/readdirp cache-miss
+59 silly fetch manifest glob-parent@~5.1.2
+60 silly packumentCache full:https://registry.npmjs.org/glob-parent cache-miss
+61 silly fetch manifest is-binary-path@~2.1.0
+62 silly packumentCache full:https://registry.npmjs.org/is-binary-path cache-miss
+63 silly fetch manifest normalize-path@~3.0.0
+64 silly packumentCache full:https://registry.npmjs.org/normalize-path cache-miss
+65 silly fetch manifest fsevents@~2.3.2
+66 silly packumentCache full:https://registry.npmjs.org/fsevents cache-miss
+67 silly fetch manifest which@^2.0.1
+68 silly packumentCache full:https://registry.npmjs.org/which cache-miss
+69 silly fetch manifest path-key@^3.1.0
+70 silly packumentCache full:https://registry.npmjs.org/path-key cache-miss
+71 silly fetch manifest shebang-command@^2.0.0
+72 silly packumentCache full:https://registry.npmjs.org/shebang-command cache-miss
+73 http fetch GET 200 https://registry.npmjs.org/is-binary-path 45ms (cache miss)
+74 silly packumentCache full:https://registry.npmjs.org/is-binary-path set size:undefined disposed:false
+75 http fetch GET 200 https://registry.npmjs.org/normalize-path 45ms (cache miss)
+76 silly packumentCache full:https://registry.npmjs.org/normalize-path set size:undefined disposed:false
+77 http fetch GET 200 https://registry.npmjs.org/anymatch 54ms (cache miss)
+78 silly packumentCache full:https://registry.npmjs.org/anymatch set size:undefined disposed:false
+79 http fetch GET 200 https://registry.npmjs.org/glob-parent 53ms (cache miss)
+80 silly packumentCache full:https://registry.npmjs.org/glob-parent set size:undefined disposed:false
+81 http fetch GET 200 https://registry.npmjs.org/path-key 52ms (cache miss)
+82 silly packumentCache full:https://registry.npmjs.org/path-key set size:undefined disposed:false
+83 http fetch GET 200 https://registry.npmjs.org/fsevents 55ms (cache miss)
+84 silly packumentCache full:https://registry.npmjs.org/fsevents set size:undefined disposed:false
+85 http fetch GET 200 https://registry.npmjs.org/readdirp 58ms (cache miss)
+86 silly packumentCache full:https://registry.npmjs.org/readdirp set size:undefined disposed:false
+87 http fetch GET 200 https://registry.npmjs.org/which 58ms (cache miss)
+88 silly packumentCache full:https://registry.npmjs.org/which set size:undefined disposed:false
+89 http fetch GET 200 https://registry.npmjs.org/shebang-command 125ms (cache miss)
+90 silly packumentCache full:https://registry.npmjs.org/shebang-command set size:undefined disposed:false
+91 silly placeDep ROOT path-key@3.1.1 OK for: cross-spawn@7.0.6 want: ^3.1.0
+92 silly placeDep ROOT shebang-command@2.0.0 OK for: cross-spawn@7.0.6 want: ^2.0.0
+93 silly placeDep ROOT which@2.0.2 OK for: cross-spawn@7.0.6 want: ^2.0.1
+94 silly fetch manifest shebang-regex@^3.0.0
+95 silly packumentCache full:https://registry.npmjs.org/shebang-regex cache-miss
+96 silly fetch manifest isexe@^2.0.0
+97 silly packumentCache full:https://registry.npmjs.org/isexe cache-miss
+98 http fetch GET 200 https://registry.npmjs.org/shebang-regex 51ms (cache miss)
+99 silly packumentCache full:https://registry.npmjs.org/shebang-regex set size:undefined disposed:false
+100 http fetch GET 200 https://registry.npmjs.org/isexe 61ms (cache miss)
+101 silly packumentCache full:https://registry.npmjs.org/isexe set size:undefined disposed:false
+102 silly placeDep ROOT shebang-regex@3.0.0 OK for: shebang-command@2.0.0 want: ^3.0.0
+103 silly placeDep ROOT isexe@2.0.0 OK for: which@2.0.2 want: ^2.0.0
+104 silly placeDep ROOT anymatch@3.1.3 OK for: chokidar@3.6.0 want: ~3.1.2
+105 silly placeDep ROOT fsevents@2.3.3 OK for: chokidar@3.6.0 want: ~2.3.2
+106 silly placeDep ROOT glob-parent@5.1.2 OK for: chokidar@3.6.0 want: ~5.1.2
+107 silly placeDep ROOT is-binary-path@2.1.0 OK for: chokidar@3.6.0 want: ~2.1.0
+108 silly placeDep ROOT normalize-path@3.0.0 OK for: chokidar@3.6.0 want: ~3.0.0
+109 silly placeDep node_modules/onchange readdirp@3.6.0 OK for: chokidar@3.6.0 want: ~3.6.0
+110 silly fetch manifest normalize-path@^3.0.0
+111 silly packumentCache full:https://registry.npmjs.org/normalize-path cache-miss
+112 silly fetch manifest binary-extensions@^2.0.0
+113 silly packumentCache full:https://registry.npmjs.org/binary-extensions cache-miss
+114 http fetch GET 200 https://registry.npmjs.org/normalize-path 4ms (cache hit)
+115 silly packumentCache full:https://registry.npmjs.org/normalize-path set size:28713 disposed:false
+116 http fetch GET 200 https://registry.npmjs.org/binary-extensions 58ms (cache miss)
+117 silly packumentCache full:https://registry.npmjs.org/binary-extensions set size:undefined disposed:false
+118 silly placeDep ROOT binary-extensions@2.3.0 OK for: is-binary-path@2.1.0 want: ^2.0.0
+119 verbose stack Error: 
+119 verbose stack `npm ci` can only install packages when your package.json and package-lock.json or npm-shrinkwrap.json are in sync. Please update your lock file with `npm install` before continuing.
+119 verbose stack
+119 verbose stack Missing: onchange@7.1.0 from lock file
+119 verbose stack Missing: @blakeembrey/deque@1.0.5 from lock file
+119 verbose stack Missing: @blakeembrey/template@1.2.0 from lock file
+119 verbose stack Missing: arg@4.1.3 from lock file
+119 verbose stack Missing: chokidar@3.6.0 from lock file
+119 verbose stack Missing: cross-spawn@7.0.6 from lock file
+119 verbose stack Missing: ignore@5.3.2 from lock file
+119 verbose stack Missing: tree-kill@1.2.2 from lock file
+119 verbose stack Missing: path-key@3.1.1 from lock file
+119 verbose stack Missing: shebang-command@2.0.0 from lock file
+119 verbose stack Missing: which@2.0.2 from lock file
+119 verbose stack Missing: shebang-regex@3.0.0 from lock file
+119 verbose stack Missing: isexe@2.0.0 from lock file
+119 verbose stack Missing: anymatch@3.1.3 from lock file
+119 verbose stack Missing: fsevents@2.3.3 from lock file
+119 verbose stack Missing: glob-parent@5.1.2 from lock file
+119 verbose stack Missing: is-binary-path@2.1.0 from lock file
+119 verbose stack Missing: normalize-path@3.0.0 from lock file
+119 verbose stack Missing: readdirp@3.6.0 from lock file
+119 verbose stack Missing: binary-extensions@2.3.0 from lock file
+119 verbose stack
+119 verbose stack Clean install a project
+119 verbose stack
+119 verbose stack Usage:
+119 verbose stack npm ci
+119 verbose stack
+119 verbose stack Options:
+119 verbose stack [--install-strategy <hoisted|nested|shallow|linked>] [--legacy-bundling]
+119 verbose stack [--global-style] [--omit <dev|optional|peer> [--omit <dev|optional|peer> ...]]
+119 verbose stack [--include <prod|dev|optional|peer> [--include <prod|dev|optional|peer> ...]]
+119 verbose stack [--strict-peer-deps] [--foreground-scripts] [--ignore-scripts] [--no-audit]
+119 verbose stack [--no-bin-links] [--no-fund] [--dry-run]
+119 verbose stack [-w|--workspace <workspace-name> [-w|--workspace <workspace-name> ...]]
+119 verbose stack [-ws|--workspaces] [--include-workspace-root] [--install-links]
+119 verbose stack
+119 verbose stack aliases: clean-install, ic, install-clean, isntall-clean
+119 verbose stack
+119 verbose stack Run "npm help ci" for more info
+119 verbose stack     at CI.usageError (/usr/local/lib/node_modules/npm/lib/base-cmd.js:109:26)
+119 verbose stack     at CI.exec (/usr/local/lib/node_modules/npm/lib/commands/ci.js:70:18)
+119 verbose stack     at async Npm.exec (/usr/local/lib/node_modules/npm/lib/npm.js:207:9)
+119 verbose stack     at async module.exports (/usr/local/lib/node_modules/npm/lib/cli/entry.js:74:5)
+120 error code EUSAGE
+121 error
+121 error `npm ci` can only install packages when your package.json and package-lock.json or npm-shrinkwrap.json are in sync. Please update your lock file with `npm install` before continuing.
+121 error
+121 error Missing: onchange@7.1.0 from lock file
+121 error Missing: @blakeembrey/deque@1.0.5 from lock file
+121 error Missing: @blakeembrey/template@1.2.0 from lock file
+121 error Missing: arg@4.1.3 from lock file
+121 error Missing: chokidar@3.6.0 from lock file
+121 error Missing: cross-spawn@7.0.6 from lock file
+121 error Missing: ignore@5.3.2 from lock file
+121 error Missing: tree-kill@1.2.2 from lock file
+121 error Missing: path-key@3.1.1 from lock file
+121 error Missing: shebang-command@2.0.0 from lock file
+121 error Missing: which@2.0.2 from lock file
+121 error Missing: shebang-regex@3.0.0 from lock file
+121 error Missing: isexe@2.0.0 from lock file
+121 error Missing: anymatch@3.1.3 from lock file
+121 error Missing: fsevents@2.3.3 from lock file
+121 error Missing: glob-parent@5.1.2 from lock file
+121 error Missing: is-binary-path@2.1.0 from lock file
+121 error Missing: normalize-path@3.0.0 from lock file
+121 error Missing: readdirp@3.6.0 from lock file
+121 error Missing: binary-extensions@2.3.0 from lock file
+121 error
+121 error Clean install a project
+121 error
+121 error Usage:
+121 error npm ci
+121 error
+121 error Options:
+121 error [--install-strategy <hoisted|nested|shallow|linked>] [--legacy-bundling]
+121 error [--global-style] [--omit <dev|optional|peer> [--omit <dev|optional|peer> ...]]
+121 error [--include <prod|dev|optional|peer> [--include <prod|dev|optional|peer> ...]]
+121 error [--strict-peer-deps] [--foreground-scripts] [--ignore-scripts] [--no-audit]
+121 error [--no-bin-links] [--no-fund] [--dry-run]
+121 error [-w|--workspace <workspace-name> [-w|--workspace <workspace-name> ...]]
+121 error [-ws|--workspaces] [--include-workspace-root] [--install-links]
+121 error
+121 error aliases: clean-install, ic, install-clean, isntall-clean
+121 error
+121 error Run "npm help ci" for more info
+122 verbose cwd /Users/holgeradmin/Documents/symfoni
+123 verbose os Darwin 24.5.0
+124 verbose node v18.20.8
+125 verbose npm  v10.8.2
+126 notice
+126 notice New [31mmajor[39m version of npm available! [31m10.8.2[39m -> [34m11.6.1[39m
+126 notice Changelog: [34mhttps://github.com/npm/cli/releases/tag/v11.6.1[39m
+126 notice To update run: [4mnpm install -g npm@11.6.1[24m
+126 notice  { force: true, [Symbol(proc-log.meta)]: true }
+127 verbose exit 1
+128 verbose code 1
+129 error A complete log of this run can be found in: /Users/holgeradmin/Documents/symfoni/.npm-cache/_logs/2025-09-27T16_53_25_678Z-debug-0.log

@@ -1,0 +1,17 @@
+{
+  "name": "cheercity-symfony-app",
+  "version": "1.0.0",
+  "description": "Symfony application with SCSS compilation",
+  "private": true,
+  "scripts": {
+    "build-css": "sass public/assets/sass/main.scss public/assets/css/main.css",
+    "watch-css": "sass --watch public/assets/sass/main.scss:public/assets/css/main.css",
+    "build-css-compressed": "sass public/assets/sass/main.scss public/assets/css/main.css --style=compressed",
+    "deploy-local": "bash ./scripts/deploy.sh",
+    "watch-and-deploy": "onchange 'public/assets/css/main.css' -- npm run deploy-local"
+  },
+  "devDependencies": {
+    "sass": "^1.70.0",
+    "onchange": "^7.1.0"
+  }
+}

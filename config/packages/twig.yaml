@@ -1,5 +1,9 @@
 twig:
     file_name_pattern: '*.twig'
+    globals:
+        menu_images_path: '%menu_images_path%'
+        colors_images_path: '%colors_images_path%'
+        products_images_path: '%products_images_path%'
 
 when@test:
     twig:

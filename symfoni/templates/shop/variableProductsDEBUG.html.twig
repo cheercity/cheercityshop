@@ -1,0 +1,249 @@
+	{# Defensive defaults: ensure these structures exist even when the controller didn't pass them
+									This prevents Twig runtime errors when the template is rendered in other contexts. #}
+	{% set items = items|default([]) %}
+	{% set items_by_color = items_by_color|default([]) %}
+	{% set items_mapping = items_mapping|default([]) %}
+	{% set item_images = item_images|default([]) %}
+	{% set products_images_path = products_images_path|default('public/assets/images/produkte') %}
+
+	{# If a product object is passed, show its raw JSON for debugging in the content area #}
+	{% if product is defined and product is not empty %}
+		<div class="container mb-4">
+			<h3>Produkt-Daten (JSON Dump)</h3>
+			<pre style="white-space:pre-wrap; background:#f6f6f6; padding:12px; border-radius:6px;">{{ product|json_encode(constant('JSON_PRETTY_PRINT') b-or constant('JSON_UNESCAPED_UNICODE')) }}</pre>
+		</div>
+
+		{# Debug dump for items_variation: full JSON and extracted image fields for each variation #}
+		{# ITEM DUMP: show the sym_Artikel_items_images single-query result returned by controller #}
+		{% if item_images is defined %}
+			{% if item_images is not empty %}
+				<div class="container mb-4">
+					<h3 style="margin-bottom:8px;">Item Images (sym_Artikel_items_images)  single query result</h3>
+					<pre style="white-space:pre-wrap; background:#f6f6f6; padding:12px; border-radius:6px;">{{ item_images|json_encode(constant('JSON_PRETTY_PRINT') b-or constant('JSON_UNESCAPED_UNICODE')) }}</pre>
+				</div>
+			{% else %}
+				<div class="container mb-4">
+					<em>No item_images returned for this SKU group.</em>
+				</div>
+			{% endif %}
+		{% endif %}
+
+		{# show the simplified mapping list built from sym_Artikel_items (present independently of the filtered `items` list) #}
+		{% if items_mapping is defined %}
+			{% if items_mapping is not empty %}
+				<div class="container mb-4">
+					<h3 style="margin-bottom:8px;">Items Mapping (FarbCode x Size -> status)</h3>
+					<div class="table-responsive">
+						<table class="table table-sm table-striped" style="font-size:13px;">
+							<thead>
+								<tr>
+									<th>Farbe</th>
+									<th>Größe</th>
+									<th>Bestand</th>
+									<th>Lieferzeit</th>
+									<th>Color URL</th>
+								</tr>
+							</thead>
+							<tbody>
+								{% for m in items_mapping %}
+									<tr>
+										<td>{{ m.FarbCode_1_descr|default('') }}</td>
+										<td>{{ m.SizeCode_descr|default('') }}</td>
+										<td>{{ m.Online_Bestand|default('') }}</td>
+										<td>{{ m.Online_Lieferzeit|default('') }}</td>
+										<td>
+											{% if m.color_url is defined and m.color_url %}
+												<a href="{{ m.color_url }}" target="_blank" rel="noopener">{{ m.color_url }}</a>
+											{% else %}
+												&ndash;
+											{% endif %}
+										</td>
+									</tr>
+								{% endfor %}
+							</tbody>
+						</table>
+					</div>
+				</div>
+			{% endif %}
+		{% endif %}
+
+		{# Derive color image filenames directly from FarbCode_1 without using Wertelisten mapping.
+																					   Naming scheme: Color_<FarbCode_1>.jpg and path is taken from `colors_images_path` parameter. #}
+		{% set color_image_links = {} %}
+
+		{# Helper: normalize base path so it starts with '/' unless it's an absolute URL #}
+		{% set base_path = colors_images_path|default('/assets/images/farben') %}
+		{# If env provides a path starting with '/public/' or 'public/', remove that prefix so URLs are web-root relative #}
+		{% if base_path|slice(0,8) == '/public/' %}
+			{% set base_path = base_path|slice(8) %}
+		{% elseif base_path|slice(0,7) == 'public/' %}
+			{% set base_path = base_path|slice(7) %}
+		{% endif %}
+		{% if base_path|slice(0,4) != 'http' and base_path|slice(0,1) != '/' %}
+			{% set base_path = '/' ~ base_path %}
+		{% endif %}
+
+		{# Build map from explicit items_mapping (preferred) or items_by_color as fallback #}
+		{% if items_mapping is defined and items_mapping|length > 0 %}
+			{% for m in items_mapping %}
+				{% set codeVal = m.FarbCode_1 is defined and m.FarbCode_1 is not null and m.FarbCode_1|trim != '' ? m.FarbCode_1|trim : null %}
+				{% set key = codeVal is not null ? codeVal : (m.FarbCode_1_descr|default('')|trim) %}
+				{% if key is not empty and (key not in color_image_links) %}
+					{% set filename = 'Color_' ~ key ~ '.jpg' %}
+					{% set mapped = base_path ~ '/' ~ filename %}
+					{% set variant_images = [] %}
+					{% for v in (items_by_color[key] is defined ? items_by_color[key] : []) %}
+						{% if v.primary_image is defined and v.primary_image|trim != '' %}
+							{% set variant_images = variant_images|merge([v.primary_image]) %}
+						{% endif %}
+					{% endfor %}
+					{# also map by human-readable label (if available) so swatch rendering can find it by color name #}
+					{% set labelKey = m.FarbCode_1_descr|default('')|trim %}
+					{% set entry = { (key) : { 'mapped': mapped, 'variant_images': variant_images } } %}
+					{% if labelKey is not empty and (labelKey not in color_image_links) %}
+						{% set entry = entry|merge({ (labelKey) : { 'mapped': mapped, 'variant_images': variant_images } }) %}
+					{% endif %}
+					{# If the mapped filename follows Color_<code>.jpg, also register that numeric code as a key (e.g., '426') #}
+					{% if mapped is defined and mapped|length > 0 and mapped matches '/Color_/' and mapped matches '/\.jpg/' %}
+						{% set tail = mapped|split('Color_')|last %}
+						{% set codeFromFile = tail|split('.jpg')|first %}
+						{% if codeFromFile is not empty and (codeFromFile not in entry) %}
+							{% set entry = entry|merge({ (codeFromFile) : { 'mapped': mapped, 'variant_images': variant_images } }) %}
+						{% endif %}
+					{% endif %}
+					{% set color_image_links = color_image_links|merge(entry) %}
+				{% endif %}
+			{% endfor %}
+		{% elseif items_by_color is defined and items_by_color|length > 0 %}
+			{% for color, variants in items_by_color %}
+				{% set codeVal = (variants[0].FarbCode_1 is defined and variants[0].FarbCode_1|trim != '') ? variants[0].FarbCode_1|trim : color %}
+				{% set filename = 'Color_' ~ codeVal ~ '.jpg' %}
+				{% set mapped = base_path ~ '/' ~ filename %}
+				{% set variant_images = [] %}
+				{% for v in variants %}
+					{% if v.primary_image is defined and v.primary_image|trim != '' %}
+						{% set variant_images = variant_images|merge([v.primary_image]) %}
+					{% endif %}
+				{% endfor %}
+				{# also register mapping under the human-readable color label so lookups by color name work #}
+				{% set labelKey = (variants[0].FarbCode_1_descr is defined and variants[0].FarbCode_1_descr|trim != '') ? variants[0].FarbCode_1_descr|trim : color %}
+				{% set entry = { (codeVal) : { 'mapped': mapped, 'variant_images': variant_images } } %}
+				{% if labelKey is not empty and (labelKey not in color_image_links) %}
+					{% set entry = entry|merge({ (labelKey) : { 'mapped': mapped, 'variant_images': variant_images } }) %}
+				{% endif %}
+				{# also register the numeric code extracted from filename Color_<code>.jpg so lookups by code work #}
+				{% if mapped is defined and mapped|length > 0 and mapped matches '/Color_/' and mapped matches '/\.jpg/' %}
+					{% set tail = mapped|split('Color_')|last %}
+					{% set codeFromFile = tail|split('.jpg')|first %}
+					{% if codeFromFile is not empty and (codeFromFile not in entry) %}
+						{% set entry = entry|merge({ (codeFromFile) : { 'mapped': mapped, 'variant_images': variant_images } }) %}
+					{% endif %}
+				{% endif %}
+				{% set color_image_links = color_image_links|merge(entry) %}
+			{% endfor %}
+		{% endif %}
+
+		{% if color_image_links is not empty %}
+			<div class="container mb-4">
+				<h3 style="margin-bottom:8px;">Color -> derived image links (Color_<code>.jpg)</h3>
+					<pre style="white-space:pre-wrap; background:#f6f6f6; padding:12px; border-radius:6px;">{{ color_image_links|json_encode(constant('JSON_PRETTY_PRINT') b-or constant('JSON_UNESCAPED_UNICODE')) }}</pre>
+				</div>
+			{% endif %}
+
+			{# If items_variation wasn't provided by the controller, show the available `items` and `items_by_color` for debugging #}
+
+
+			{# If items were passed (from the dev dump), render a simple size/stock selector and images #}
+			
+			{% if items is defined and items|length > 0 %}
+				<div class="container mb-4">
+					<h4>Verfügbare Varianten</h4>
+					<div
+						class="variants">
+						{# items_by_color is prepared in the controller to avoid relying on Twig extensions #}
+						{% if items_by_color is defined and items_by_color|length > 0 %}
+							{% for color, variants in items_by_color %}
+								<div class="variant-group">
+									<strong>{{ color }}</strong>
+									{# DEBUG: show computed colorCode and derivedMapped for each color to troubleshoot missing swatch images #}
+									<div style="font-size:12px;color:#666;margin-bottom:6px;">Debug: colorCode={{ (variants[0].FarbCode_1 is defined and variants[0].FarbCode_1|trim != '') ? variants[0].FarbCode_1|trim : color }}
+										derived={{ (colors_images_path|default('/assets/images/farben')|slice(0,8) == '/public/' ? colors_images_path|slice(8) : (colors_images_path|default('/assets/images/farben')|slice(0,7) == 'public/' ? colors_images_path|slice(7) : colors_images_path|default('/assets/images/farben'))) }}/Color_...jpg</div>
+									<div class="sizes">
+										{% for v in variants %}
+											{# Try to resolve a human-friendly label for the size via Wertelisten mapping #}
+											{% set sizeLabel = v.SizeCode_descr|default(wl_label('Groessencode' , v.SizeCode|default('')) ) %}
+											<button class="size-item" data-recid="{{ v.recID }}" data-stock="{{ v.Online_Bestand }}">{{ sizeLabel }}</button>
+										{% endfor %}
+									</div>
+									{# show first image for this color if available #}
+									{% set firstImage = null %}
+									{% if variants[0].images is defined and variants[0].images|length > 0 %}
+										{% set fi = variants[0].images[0] %}
+										{# Prefer the new FM field Image_file_1500px, fallback to Image_file or string entries #}
+										{% if fi is iterable and fi.Image_file_1500px is defined and fi.Image_file_1500px|trim != '' %}
+											{# normalize products_images_path: remove leading 'public/' and ensure it starts with '/' unless it's an absolute URL #}
+											{% set prod_base = products_images_path|default('public/assets/images/produkte') %}
+											{% if prod_base|slice(0,7) == 'public/' %}
+												{% set prod_base = prod_base|slice(7) %}
+											{% endif %}
+											{# Debug snippet: list computed swatch image URLs for easier inspection when JS not available #}
+											<div id="swatch-debug" style="margin-top:8px;font-size:13px;color:#444;">
+												<strong>Swatch URLs (debug):</strong>
+												<ul>
+													{% for color, variants in items_by_color %}
+														{% set colorCode = (variants[0].FarbCode_1 is defined and variants[0].FarbCode_1|trim != '') ? variants[0].FarbCode_1|trim : color %}
+														{% set eff_base = colors_images_path|default('/assets/images/farben') %}
+														{% if eff_base|slice(0,8) == '/public/' %}
+															{% set eff_base = eff_base|slice(8) %}
+														{% elseif eff_base|slice(0,7) == 'public/' %}
+															{% set eff_base = eff_base|slice(7) %}
+														{% endif %}
+														{% if eff_base|slice(0,4) != 'http' and eff_base|slice(0,1) != '/' %}
+															{% set eff_base = '/' ~ eff_base %}
+														{% endif %}
+														<li>{{ color }}
+															->
+															{{ eff_base }}/Color_{{ colorCode }}.jpg</li>
+													{% endfor %}
+												</ul>
+											</div>
+											{% if not (prod_base|slice(0,1) == '/' or prod_base|slice(0,4) == 'http') %}
+												{% set prod_base = '/' ~ prod_base %}
+											{% endif %}
+											{% set firstImage = prod_base ~ '/' ~ fi.Image_file_1500px %}
+										{% elseif fi is iterable and fi.Image_file is defined and fi.Image_file|trim != '' %}
+											{% set prod_base = products_images_path|default('public/assets/images/produkte') %}
+											{% if prod_base|slice(0,7) == 'public/' %}
+												{% set prod_base = prod_base|slice(7) %}
+											{% endif %}
+											{% if not (prod_base|slice(0,1) == '/' or prod_base|slice(0,4) == 'http') %}
+												{% set prod_base = '/' ~ prod_base %}
+											{% endif %}
+											{% set firstImage = prod_base ~ '/' ~ fi.Image_file %}
+										{% elseif fi is not iterable and fi|trim != '' %}
+											{# if fi is a plain filename, prefix with products_images_path; if it's already a URL/path, use it as-is #}
+											{% if fi|slice(0,4) == 'http' or fi|slice(0,1) == '/' %}
+												{% set firstImage = fi %}
+											{% else %}
+												{% set prod_base = products_images_path|default('public/assets/images/produkte') %}
+												{% if prod_base|slice(0,7) == 'public/' %}
+													{% set prod_base = prod_base|slice(7) %}
+												{% endif %}
+												{% if not (prod_base|slice(0,1) == '/' or prod_base|slice(0,4) == 'http') %}
+													{% set prod_base = '/' ~ prod_base %}
+												{% endif %}
+												{% set firstImage = prod_base ~ '/' ~ fi %}
+											{% endif %}
+										{% endif %}
+									{% endif %}
+									{% if firstImage %}
+										<div class="color-image mt-2"><img src="{{ firstImage }}" alt="{{ color }}" style="max-width:200px;"/></div>
+									{% endif %}
+								</div>
+							{% endfor %}
+						</div>
+					</div>
+				{% endif %}
+			{% endif %}
+
+		{% endif %}

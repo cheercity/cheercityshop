@@ -1,0 +1,192 @@
+{% extends './layout/layout.html.twig' %}
+
+{% block content %}
+    <div class="container mt-5">
+        <h2>Navigation Tree</h2>
+        <p>Records: {{ analysis.recordCount }} — max depth: {{ analysis.maxDepth }}</p>
+        <div class="row">
+            <div class="col-md-4">
+                <h4>Summary</h4>
+                <ul>
+                    <li>Unique fields: {{ analysis.uniqueFieldNames|length }}</li>
+                    <li>Map Cat IDs: {{ analysis.mapCatCount }}</li>
+                    <li>Orphans: {{ analysis.orphans|length }}</li>
+                    <li>Duplicates (slugs): {{ analysis.duplicateSlugs|length }}</li>
+                </ul>
+                <h5>Groups</h5>
+                <ul>
+                    {% for gk, group in analysis.groups %}
+                        <li>{{ gk }}: {{ group|length }} distinct values
+                            <ul>
+                                {% for val, ids in group|slice(0,5) %}
+                                    <li>{{ val }} ({{ ids|length }}) - sample: 
+                                        {% for id in ids|slice(0,3) %}{{ analysis.sample[0].internalId == id ? analysis.sample[0].title : (id) }}{% if not loop.last %}, {% endif %}{% endfor %}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <h5>Unresolved parents (sample)</h5>
+                <pre>{{ analysis.unresolvedParents|json_encode(constant('JSON_PRETTY_PRINT')) }}</pre>
+            </div>
+            <div class="col-md-8">
+                <h4>Tree View</h4>
+                <div class="nav-tree">
+                    <h5>Grouped Tree (cat00 → cat01 → cat02)</h5>
+                    <div id="grouped-tree-app" class="grouped-tree">
+                        <div class="gt-controls mb-2">
+                            <input id="gt-search" type="search" class="form-control" placeholder="Search groups or samples..." />
+                            <div class="mt-2">
+                                <label><input id="gt-show-duplicates" type="checkbox" checked /> Highlight duplicates</label>
+                                &nbsp; <label><input id="gt-show-orphans" type="checkbox" checked /> Highlight orphans</label>
+                                &nbsp; <button id="gt-collapse-all" class="btn btn-sm btn-outline-secondary">Collapse all</button>
+                                <button id="gt-expand-all" class="btn btn-sm btn-outline-secondary">Expand all</button>
+                            </div>
+                        </div>
+                        <div id="gt-legend" class="mb-2 small text-muted">Tip: click a node to expand/collapse. Use the search box to filter visible nodes.</div>
+                        <div id="gt-root"></div>
+                        <pre id="gt-debug" style="display:none"></pre>
+                        <script>
+                            (function(){
+                                const data = {{ analysis.groupedTree|json_encode|raw }};
+                                const duplicateLinks = {{ analysis.duplicateLinks|json_encode|raw }};
+                                const orphans = {{ analysis.orphans|json_encode|raw }};
+
+                                function createNode(item, level){
+                                    const el = document.createElement('div');
+                                    el.className = 'gt-node level-' + level;
+                                    el.dataset.ids = (item.ids || []).join(',');
+                                    el.dataset.value = item.value;
+
+                                    const header = document.createElement('div');
+                                    header.className = 'gt-header';
+                                    const link = item.link ? escapeHtml(item.link) : '#';
+                                    header.innerHTML = `<span class="gt-toggle">▸</span> <a class="gt-link" href="${link}" target="_blank"><strong class="gt-title">${escapeHtml(item.value)}</strong></a> <span class="gt-count">(${item.count})</span>`;
+                                    el.appendChild(header);
+
+                                    if (item.sample && item.sample.length) {
+                                        const s = document.createElement('div');
+                                        s.className = 'gt-sample small text-muted';
+                                        s.textContent = 'Sample: ' + item.sample.join(', ');
+                                        el.appendChild(s);
+                                    }
+
+                                    const childrenWrap = document.createElement('div');
+                                    childrenWrap.className = 'gt-children';
+                                    if (item.children && item.children.length) {
+                                        item.children.forEach(function(c){
+                                            childrenWrap.appendChild(createNode(c, level+1));
+                                        });
+                                    }
+                                    el.appendChild(childrenWrap);
+
+                                    header.addEventListener('click', function(){
+                                        const collapsed = el.classList.toggle('collapsed');
+                                        header.querySelector('.gt-toggle').textContent = collapsed ? '▸' : '▾';
+                                    });
+
+                                    return el;
+                                }
+
+                                function escapeHtml(s){
+                                    return String(s).replace(/[&"'<>]/g, function(c){
+                                        return {'&':'&amp;','"':'&quot;','\'':'&#39;','<':'&lt;','>':'&gt;'}[c];
+                                    });
+                                }
+
+                                function nodeIds(el){
+                                    const ids = el.dataset.ids || '';
+                                    return ids === '' ? [] : ids.split(',').map(function(x){return x.trim();});
+                                }
+
+                                const root = document.getElementById('gt-root');
+                                data.forEach(function(g0){ root.appendChild(createNode(g0, 0)); });
+
+                                // helpers
+                                function markDuplicates(show){
+                                    const dupIds = new Set();
+                                    Object.values(duplicateLinks).forEach(function(arr){ arr.forEach(id=>dupIds.add(String(id))); });
+                                    document.querySelectorAll('#gt-root .gt-node').forEach(function(n){
+                                        const ids = nodeIds(n).map(String);
+                                        const isDup = ids.some(id => dupIds.has(id));
+                                        n.classList.toggle('gt-dup', show && isDup);
+                                    });
+                                }
+
+                                function markOrphans(show){
+                                    const orphanSet = new Set((orphans||[]).map(String));
+                                    document.querySelectorAll('#gt-root .gt-node').forEach(function(n){
+                                        const ids = nodeIds(n).map(String);
+                                        const isOrphan = ids.some(id => orphanSet.has(id));
+                                        n.classList.toggle('gt-orphan', show && isOrphan);
+                                    });
+                                }
+
+                                function collapseAll(){ document.querySelectorAll('#gt-root .gt-node').forEach(n=>n.classList.add('collapsed')); document.querySelectorAll('#gt-root .gt-node .gt-toggle').forEach(t=>t.textContent='▸'); }
+                                function expandAll(){ document.querySelectorAll('#gt-root .gt-node').forEach(n=>n.classList.remove('collapsed')); document.querySelectorAll('#gt-root .gt-node .gt-toggle').forEach(t=>t.textContent='▾'); }
+
+                                document.getElementById('gt-collapse-all').addEventListener('click', collapseAll);
+                                document.getElementById('gt-expand-all').addEventListener('click', expandAll);
+
+                                document.getElementById('gt-show-duplicates').addEventListener('change', function(e){ markDuplicates(e.target.checked); });
+                                document.getElementById('gt-show-orphans').addEventListener('change', function(e){ markOrphans(e.target.checked); });
+
+                                // search
+                                const searchInput = document.getElementById('gt-search');
+                                let lastQuery = '';
+                                function filterNodes(query){
+                                    query = (query||'').trim().toLowerCase();
+                                    document.querySelectorAll('#gt-root .gt-node').forEach(function(n){
+                                        const title = (n.querySelector('.gt-title')?.textContent||'').toLowerCase();
+                                        const sample = (n.querySelector('.gt-sample')?.textContent||'').toLowerCase();
+                                        const match = query === '' || title.indexOf(query) !== -1 || sample.indexOf(query) !== -1 || (n.dataset.ids||'').indexOf(query) !== -1;
+                                        n.style.display = match ? '' : 'none';
+                                    });
+                                }
+                                searchInput.addEventListener('input', function(e){ filterNodes(e.target.value); });
+
+                                // initial markings
+                                markDuplicates(document.getElementById('gt-show-duplicates').checked);
+                                markOrphans(document.getElementById('gt-show-orphans').checked);
+
+                                // collapse all initially for compactness
+                                collapseAll();
+                            })();
+                        </script>
+                        <style>
+                            #grouped-tree-app .gt-node{border-left:1px dashed rgba(0,0,0,0.05); padding:6px 8px; margin:6px 0}
+                            #grouped-tree-app .gt-node .gt-children{margin-left:16px}
+                            #grouped-tree-app .gt-node.collapsed > .gt-children{display:none}
+                            #grouped-tree-app .gt-node .gt-toggle{cursor:pointer; display:inline-block; width:18px}
+                            #grouped-tree-app .gt-node.gt-dup{background: rgba(255,235,59,0.15);}
+                            #grouped-tree-app .gt-node.gt-orphan{background: rgba(244,67,54,0.08);}
+                            #grouped-tree-app .gt-sample{margin-top:4px}
+                        </style>
+                    </div>
+
+                    {% macro renderNode(node) %}
+                        <li>
+                            <strong>{{ node.title }}</strong>
+                            {% if node.children is not empty %}
+                                <ul>
+                                    {% for c in node.children %}
+                                        {{ _self.renderNode(c) }}
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </li>
+                    {% endmacro %}
+
+                    <ul>
+                        {% for root in analysis.tree %}
+                            {{ _self.renderNode(root) }}
+                        {% else %}
+                            <li><em>No tree data</em></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

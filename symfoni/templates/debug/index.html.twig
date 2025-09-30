@@ -1,0 +1,94 @@
+{% extends 'base.html.twig' %}
+{% block title %}Debug Center{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">
+                <i class="fas fa-bug"></i> Debug Center
+                <small class="text-muted">FileMaker Integration Tests</small>
+            </h1>
+            
+            <div class="alert alert-info" role="alert">
+                <i class="fas fa-info-circle"></i>
+                <strong>Debug-Module Übersicht</strong><br>
+                Hier findest du alle verfügbaren Debug-Module zum Testen der FileMaker-Integration.
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        {% for module in modules %}
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card h-100 {{ module.disabled|default(false) ? 'border-secondary' : 'border-' ~ module.color }}">
+                    <div class="card-header bg-{{ module.color }} text-white {{ module.disabled|default(false) ? 'bg-secondary' : '' }}">
+                        <h5 class="card-title mb-0">
+                            <i class="{{ module.icon }}"></i> {{ module.name }}
+                        </h5>
+                    </div>
+                    <div class="card-body d-flex flex-column">
+                        <p class="card-text flex-grow-1">{{ module.description }}</p>
+                        
+                        {% if module.disabled|default(false) %}
+                            <button class="btn btn-secondary" disabled>
+                                <i class="fas fa-lock"></i> Noch nicht verfügbar
+                            </button>
+                        {% else %}
+                            <a href="{{ path(module.route) }}" class="btn btn-{{ module.color }}">
+                                <i class="fas fa-play"></i> Debug starten
+                            </a>
+                            {# If this is the Cache Debug card, add Clear Cache action #}
+                            {% if module.route == 'debug_cache_info' %}
+                                <form method="post" action="{{ path('debug_clear_cache') }}" style="display:inline-block; margin-left:8px;">
+                                    {% if not app.debug %}
+                                        <input type="text" name="key" placeholder="Clear key" class="form-control form-control-sm d-inline-block" style="width:180px; vertical-align:middle;" />
+                                    {% endif %}
+                                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Clear cache? This will remove var/cache/* on the server.');">
+                                        <i class="fas fa-broom"></i> Clear Cache
+                                    </button>
+                                </form>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                    {% if not module.disabled|default(false) %}
+                        <div class="card-footer text-muted">
+                            <small><i class="fas fa-route"></i> Route: {{ module.route }}</small>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-cogs"></i> System Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>FileMaker Connection</h6>
+                            <ul class="list-unstyled">
+                                <li><strong>Host:</strong> <span class="badge bg-info">{{ app.request.server.get('FM_HOST', 'Nicht gesetzt') }}</span></li>
+                                <li><strong>Database:</strong> <span class="badge bg-info">{{ app.request.server.get('FM_DB', 'Nicht gesetzt') }}</span></li>
+                                <li><strong>User:</strong> <span class="badge bg-info">{{ app.request.server.get('FM_USER', 'Nicht gesetzt') }}</span></li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Debug Environment</h6>
+                            <ul class="list-unstyled">
+                                <li><strong>Environment:</strong> <span class="badge bg-success">{{ app.environment }}</span></li>
+                                <li><strong>Debug Mode:</strong> <span class="badge bg-{{ app.debug ? 'success' : 'warning' }}">{{ app.debug ? 'Enabled' : 'Disabled' }}</span></li>
+                                <li><strong>Datum:</strong> <span class="badge bg-secondary">{{ 'now'|date('d.m.Y H:i:s') }}</span></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

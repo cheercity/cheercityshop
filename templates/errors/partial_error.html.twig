@@ -1,0 +1,40 @@
+{% extends 'layout/layout.html.twig' %}
+
+{% block content %}
+	<div class="container mt-4">
+		<div class="alert alert-warning">
+			<h3>Entschuldigung — ein Problem ist aufgetreten</h3>
+			<p>Bei der Anzeige dieser Seite ist ein Fehler aufgetreten. Unsere Techniker wurden informiert.</p>
+		</div>
+		{# Optionally show a friendly retry link or a reduced product listing here #}
+		<p>
+			<a href="{{ path('homepage') }}">Zur Startseite</a>
+		</p>
+	</div>
+{% endblock %}
+<div class="container mt-4">
+	<div class="alert alert-warning">
+		<h3>Entschuldigung — ein Problem ist aufgetreten</h3>
+		<p>Bei der Anzeige dieser Seite ist ein Fehler aufgetreten. Unsere Techniker wurden informiert.</p>
+	</div>
+	{# Optionally show a friendly retry link or a reduced product listing here #}
+	<p>
+		<a href="{{ path('homepage') }}">Zur Startseite</a>
+	</p>
+
+	{# If the subscriber passed 'error' (dev mode), show a collapsible details box #}
+	{% if error is defined %}
+		<hr/>
+		<button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#errdetails" aria-expanded="false" aria-controls="errdetails">
+			Fehlerdetails anzeigen
+		</button>
+		<div class="collapse mt-3" id="errdetails">
+			<div style="white-space:pre-wrap; background:#f8f9fa; padding:12px; border-radius:6px; font-family:monospace; font-size:12px;">
+				<strong>Message:</strong>
+				<div>{{ error }}</div>
+				<strong>Trace:</strong>
+				<div>{{ trace }}</div>
+			</div>
+		</div>
+	{% endif %}
+</div>{% endblock %}

@@ -1,0 +1,26 @@
+# Production Environment Configuration for sym.cheercity-shop.de
+# 
+# Diese Datei sollte als .env auf dem Live-Server verwendet werden.
+# Sie überschreibt die lokale Entwicklungsumgebung mit Produktionseinstellungen.
+
+###> symfony/framework-bundle ###
+APP_ENV=prod
+APP_SECRET=a2c1c45136dfc2d03ceb85b6e139b91c
+APP_DEBUG=0
+###< symfony/framework-bundle ###
+
+###> doctrine/doctrine-bundle ###
+# Doctrine Database ist optional - kann auskommentiert bleiben wenn nicht verwendet
+# DATABASE_URL="mysql://user:pass@127.0.0.1:3306/database?serverVersion=8.0.32&charset=utf8mb4"
+###< doctrine/doctrine-bundle ###
+
+# FileMaker REST API credentials
+FM_HOST="https://fms.cheercity-shop.de"
+FM_DB="CHEERCITYshop"
+FM_USER="eshop"
+FM_PASS="PjZtvq%XNQ@§4_$"
+
+# Production optimizations
+OPCACHE_ENABLED=1
+REALPATH_CACHE_SIZE=4096K
+REALPATH_CACHE_TTL=600

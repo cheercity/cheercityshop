@@ -8,23 +8,33 @@ use Symfony\Component\Routing\Attribute\Route;
 
 final class BlogController extends AbstractController
 {
-
-    #[Route('/contact',name: 'contact') ]
+    #[Route('/contact', name: 'contact') ]
     public function contact(): Response
     {
-        return $this->render('blog/contact.html.twig',[
+        $av = $this->getAssetVersion();
+
+        return $this->render('blog/contact.html.twig', [
             'title' => 'Contact',
             'subTitle' => 'Blog',
             'subTitle2' => 'Contact',
-            'css' => "<link rel='stylesheet' href='assets/css/variables/variable6.css'>",
+            'css' => ['assets/css/variables/variable6.css'],
             'footer' => 'true',
         ]);
     }
 
-    #[Route('/news',name: 'news') ]
+    private function getAssetVersion(): string
+    {
+        try {
+            return (string) $this->getParameter('asset_version');
+        } catch (\Symfony\Component\DependencyInjection\Exception\ParameterNotFoundException $e) {
+            return (string) time();
+        }
+    }
+
+    #[Route('/news', name: 'news') ]
     public function news(): Response
     {
-        return $this->render('blog/news.html.twig',[
+        return $this->render('blog/news.html.twig', [
             'title' => 'News',
             'subTitle' => 'Blog',
             'subTitle2' => 'News',
@@ -32,10 +42,10 @@ final class BlogController extends AbstractController
         ]);
     }
 
-    #[Route('/news-details',name: 'newsDetails') ]
+    #[Route('/news-details', name: 'newsDetails') ]
     public function newsDetails(): Response
     {
-        return $this->render('blog/newsDetails.html.twig',[
+        return $this->render('blog/newsDetails.html.twig', [
             'title' => 'News Details',
             'subTitle' => 'Blog',
             'subTitle2' => 'News Details',
@@ -43,15 +53,14 @@ final class BlogController extends AbstractController
         ]);
     }
 
-    #[Route('/news-grid',name: 'newsGrid') ]
+    #[Route('/news-grid', name: 'newsGrid') ]
     public function newsGrid(): Response
     {
-        return $this->render('blog/newsGrid.html.twig',[
+        return $this->render('blog/newsGrid.html.twig', [
             'title' => 'News Grid',
             'subTitle' => 'Blog',
             'subTitle2' => 'News Grid',
             'footer' => 'true',
         ]);
     }
-
 }

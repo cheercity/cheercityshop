@@ -1,0 +1,5 @@
+services:
+    # In dev we don't have the tuned Redis pool; alias it to the active app cache (filesystem)
+    cache.app.tuned:
+        alias: 'cache.app'
+        public: false

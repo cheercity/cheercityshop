@@ -1,0 +1,146 @@
+[
+    {
+        "recID": 621,
+        "FarbCode_1_descr": "White",
+        "SizeCode_descr": "4",
+        "Online_Bestand": 8,
+        "Online_Lieferzeit": "ab Lager",
+        "images": []
+    },
+    {
+        "recID": 622,
+        "FarbCode_1_descr": "White",
+        "SizeCode_descr": "4,5",
+        "Online_Bestand": 6,
+        "Online_Lieferzeit": "ab Lager",
+        "images": []
+    },
+    {
+        "recID": 623,
+        "FarbCode_1_descr": "White",
+        "SizeCode_descr": "5",
+        "Online_Bestand": 12,
+        "Online_Lieferzeit": "ab Lager",
+        "images": []
+    },
+    {
+        "recID": 625,
+        "FarbCode_1_descr": "White",
+        "SizeCode_descr": "6",
+        "Online_Bestand": 5,
+        "Online_Lieferzeit": "ab Lager",
+        "images": []
+    },
+    {
+        "recID": 626,
+        "FarbCode_1_descr": "White",
+        "SizeCode_descr": "6,5",
+        "Online_Bestand": 5,
+        "Online_Lieferzeit": "ab Lager",
+        "images": []
+    },
+    {
+        "recID": 627,
+        "FarbCode_1_descr": "White",
+        "SizeCode_descr": "7",
+        "Online_Bestand": 12,
+        "Online_Lieferzeit": "ab Lager",
+        "images": []
+    },
+    {
+        "recID": 628,
+        "FarbCode_1_descr": "White",
+        "SizeCode_descr": "7,5",
+        "Online_Bestand": 3,
+        "Online_Lieferzeit": "ab Lager",
+        "images": []
+    },
+    {
+        "recID": 629,
+        "FarbCode_1_descr": "White",
+        "SizeCode_descr": "8",
+        "Online_Bestand": 6,
+        "Online_Lieferzeit": "ab Lager",
+        "images": []
+    },
+    {
+        "recID": 630,
+        "FarbCode_1_descr": "White",
+        "SizeCode_descr": "8,5",
+        "Online_Bestand": 7,
+        "Online_Lieferzeit": "ab Lager",
+        "images": []
+    },
+    {
+        "recID": 631,
+        "FarbCode_1_descr": "White",
+        "SizeCode_descr": "9",
+        "Online_Bestand": 1,
+        "Online_Lieferzeit": "ca. 4 - 6 Wochen",
+        "images": []
+    },
+    {
+        "recID": 632,
+        "FarbCode_1_descr": "White",
+        "SizeCode_descr": "9,5",
+        "Online_Bestand": 6,
+        "Online_Lieferzeit": "ab Lager",
+        "images": []
+    },
+    {
+        "recID": 633,
+        "FarbCode_1_descr": "White",
+        "SizeCode_descr": "10",
+        "Online_Bestand": 3,
+        "Online_Lieferzeit": "ab Lager",
+        "images": []
+    },
+    {
+        "recID": 634,
+        "FarbCode_1_descr": "White",
+        "SizeCode_descr": "10,5",
+        "Online_Bestand": 1,
+        "Online_Lieferzeit": "ca. 4 - 6 Wochen",
+        "images": []
+    },
+    {
+        "recID": 635,
+        "FarbCode_1_descr": "White",
+        "SizeCode_descr": "11",
+        "Online_Bestand": 2,
+        "Online_Lieferzeit": "ca. 4 - 6 Wochen",
+        "images": []
+    },
+    {
+        "recID": 636,
+        "FarbCode_1_descr": "White",
+        "SizeCode_descr": "12",
+        "Online_Bestand": 1,
+        "Online_Lieferzeit": "ca. 4 - 6 Wochen",
+        "images": []
+    },
+    {
+        "recID": 637,
+        "FarbCode_1_descr": "White",
+        "SizeCode_descr": "13",
+        "Online_Bestand": 4,
+        "Online_Lieferzeit": "ab Lager",
+        "images": []
+    },
+    {
+        "recID": 4636,
+        "FarbCode_1_descr": "White",
+        "SizeCode_descr": "14",
+        "Online_Bestand": 1,
+        "Online_Lieferzeit": "ca. 4 - 6 Wochen",
+        "images": []
+    },
+    {
+        "recID": 6991,
+        "FarbCode_1_descr": "White",
+        "SizeCode_descr": "5,5",
+        "Online_Bestand": 1,
+        "Online_Lieferzeit": "ca. 4 - 6 Wochen",
+        "images": []
+    }
+]

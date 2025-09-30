@@ -1,0 +1,670 @@
+{% extends 'layout/layout.html.twig' %}
+
+{% block content %}
+
+		<!-- ..::Product-details Section Start Here::.. -->
+		<div class="rts-product-details-section rts-product-details-section2 section-gap">
+			<div class="container">
+				<div class="row product-row">
+					<div class="col-xl-12">
+						<div class="product-area details-product-area mb--70 justify-content-center">
+							<div class="product-thumb-area">
+								<div class="cursor"></div>
+								<div
+									class="thumb-wrapper img-1 filterd-items figure">
+									{# Prefer using images returned in sym_Artikel_items_images (item_images) as the main product image; fall back to bundled asset if not available #}
+									{% set mainImage = null %}
+									{% if item_images is defined and item_images|length > 0 %}
+										{% set prod_base = products_images_path|default('public/assets/images/produkte') %}
+										{% if prod_base|slice(0,7) == 'public/' %}
+											{% set prod_base = prod_base|slice(7) %}
+										{% endif %}
+										{% if not (prod_base|slice(0,1) == '/' or prod_base|slice(0,4) == 'http') %}
+											{% set prod_base = '/' ~ prod_base %}
+										{% endif %}
+										{% for imi in item_images %}
+											{% if mainImage is empty %}
+												{% set candidate = '' %}
+												{% if imi is iterable and imi.Image_file_1500px is defined and imi.Image_file_1500px|trim != '' %}
+													{% set candidate = prod_base ~ '/' ~ imi.Image_file_1500px %}
+												{% elseif imi is iterable and imi.Image_file is defined and imi.Image_file|trim != '' %}
+													{% set candidate = prod_base ~ '/' ~ imi.Image_file %}
+												{% elseif imi is not iterable and imi|trim != '' %}
+													{% if imi|slice(0,4) == 'http' or imi|slice(0,1) == '/' %}
+														{% set candidate = imi %}
+													{% else %}
+														{% set candidate = prod_base ~ '/' ~ imi %}
+													{% endif %}
+												{% endif %}
+												{% if candidate is not empty %}
+													{% set mainImage = candidate %}
+												{% endif %}
+											{% endif %}
+										{% endfor %}
+									{% endif %}
+									<div class="product-thumb zoom" onmousemove="zoom(event)" style="background-image: url('{{ mainImage is not empty ? mainImage : asset('/assets/images/hand-picked/slider-img8_3.jpg') }}')">
+										<img src="{{ mainImage is not empty ? mainImage : asset('/assets/images/hand-picked/slider-img8_3.jpg') }}" alt="product-thumb">
+									</div>
+								</div>
+								{# Dynamische Hauptbilder basierend auf item_images - für alle Bilder #}
+								{% if item_images is defined and item_images is not empty %}
+									{% set prod_base = products_images_path|default('public/assets/images/produkte') %}
+									{% for img in item_images %}
+										{% if img.Image_file_1500px is defined and img.Image_file_1500px|trim != '' %}
+											{% if loop.index > 1 %}
+												<div class="thumb-wrapper img-{{loop.index}} filterd-items hide">
+													<div class="product-thumb zoom" onmousemove="zoom(event)" style="background-image: url('{{prod_base}}/{{img.Image_file_1500px}}')">
+														<img src="{{prod_base}}/{{img.Image_file_1500px}}" alt="product-thumb">
+													</div>
+												</div>
+											{% endif %}
+										{% endif %}
+									{% endfor %}
+								{% else %}
+									{# Fallback zu statischen Hauptbildern wenn keine item_images vorhanden #}
+									<div class="thumb-wrapper img-2 filterd-items hide">
+										<div class="product-thumb zoom" onmousemove="zoom(event)" style="background-image: url('/assets/images/hand-picked/woman-shirt-338x450.png')"><img src="{{ asset('/assets/images/hand-picked/woman-shirt-338x450.png') }}" alt="product-thumb">
+										</div>
+									</div>
+									<div class="thumb-wrapper img-3 filterd-items hide">
+										<div class="product-thumb zoom" onmousemove="zoom(event)" style="background-image: url('/assets/images/hand-picked/slider-img12-3.webp')"><img src="{{ asset('/assets/images/hand-picked/slider-img12-3.webp') }}" alt="product-thumb">
+										</div>
+									</div>
+								{% endif %}
+								<div class="product-thumb-filter-group">
+									{% if item_images is defined and item_images is not empty %}
+										{% set prod_base = products_images_path|default('public/assets/images/produkte') %}
+										{% for img in item_images %}
+											{% if img.Image_file_1500px is defined and img.Image_file_1500px|trim != '' %}
+												<div class="thumb-filter filter-btn {% if loop.first %}active{% endif %}" data-show=".img-{{loop.index}}"><img src="{{prod_base}}/{{img.Image_file_1500px}}" alt="product-thumb-filter"></div>
+											{% endif %}
+										{% endfor %}
+									{% endif %}
+								</div>
+								
+							</div>
+							<div class="contents">
+								<h1 class="product-title">{{ product.Artikel_Bezeichung_DE|default(product.Artikel_Bezeichnung_DE|default(product.Title|default('Product'))) }}</h1>
+								<span class="product-price">
+									{{ (product.Artikel_Preis_VK_Brutto_Online is defined ? product.Artikel_Preis_VK_Brutto_Online : 0)|number_format(2, ',', '.') }}
+									&nbsp;€
+								</span>
+								<p>
+									Alle Preise inkl. MwSt. zzgl. Versandkosten.
+								</p>
+								<div class="action-item2">
+									<div class="action-top">
+										<span class="action-title">Farbe :</span>
+									</div>
+									{# Render unique color swatches/buttons (one per color) and prepare JS data #}
+									{% if items_by_color is defined and items_by_color|length > 0 %}
+										{% for color, variants in items_by_color %}
+											{% set firstImage = null %}
+											{# Prefer image mapped in Wertelisten for the color code first #}
+											{# prefer FarbCode_1 (code) on the variant if present, else use the human-readable color string #}
+											{% set colorCode = (variants[0].FarbCode_1 is defined and variants[0].FarbCode_1|trim != '') ? variants[0].FarbCode_1|trim : color %}
+											{# Prefer the derived Color_<code>.jpg path we computed above; otherwise fallback to variant.primary_image #}
+											{# Safely resolve derived mapped image by code, avoiding undefined index errors #}
+											{# Derive Color_<code>.jpg directly from a normalized colors_images_path (defensive: compute locally) #}
+												{% set eff_base = colors_images_path|default('/assets/images/farben') %}
+												{% if eff_base|slice(0,8) == '/public/' %}{% set eff_base = eff_base|slice(8) %}
+											{% elseif eff_base|slice(0,7) == 'public/' %}
+												{% set eff_base = eff_base|slice(7) %}
+											{% endif %}
+											{% if eff_base|slice(0,4) != 'http' and eff_base|slice(0,1) != '/' %}
+												{% set eff_base = '/' ~ eff_base %}
+											{% endif %}
+											{% set derivedFilename = 'Color_' ~ colorCode ~ '.jpg' %}
+											{% set derivedMapped = eff_base ~ '/' ~ derivedFilename %}
+											{% set firstImage = '' %}
+											{# Prefer item_images entries that match this variant (by recID) when available #}
+											{% if item_images is defined and item_images is iterable and variants[0].recID is defined %}
+												{# normalize products images base once so we can safely concat below (avoid 'defined' test on expressions) #}
+												{% set prod_base = products_images_path|default('public/assets/images/produkte') %}
+												{% if prod_base|slice(0,7) == 'public/' %}
+													{% set prod_base = prod_base|slice(7) %}
+												{% endif %}
+												{% if not (prod_base|slice(0,1) == '/' or prod_base|slice(0,4) == 'http') %}
+													{% set prod_base = '/' ~ prod_base %}
+												{% endif %}
+												{% for imi in item_images %}
+													{% if imi.recID is defined and imi.recID == variants[0].recID %}
+														{% if firstImage is empty and imi is iterable and imi.Image_file_1500px is defined and imi.Image_file_1500px|trim != '' %}
+															{% set firstImage = prod_base ~ '/' ~ imi.Image_file_1500px %}
+														{% elseif firstImage is empty and imi is iterable and imi.Image_file is defined and imi.Image_file|trim != '' %}
+															{% set firstImage = prod_base ~ '/' ~ imi.Image_file %}
+														{% elseif firstImage is empty and imi is not iterable and imi|trim != '' %}
+															{% set firstImage = imi %}
+														{% endif %}
+													{% endif %}
+												{% endfor %}
+											{% endif %}
+											{# fallback: use derived mapped color image or item variant primary image #}
+											{% if firstImage is empty %}
+												{% set firstImage = derivedMapped %}
+												{% if (firstImage is empty) and color_image_links[colorCode] is defined and color_image_links[colorCode].mapped is defined and color_image_links[colorCode].mapped|trim != '' %}
+													{% set firstImage = color_image_links[colorCode].mapped %}
+												{% elseif (firstImage is empty) and color_image_links[color] is defined and color_image_links[color].mapped is defined and color_image_links[color].mapped|trim != '' %}
+													{% set firstImage = color_image_links[color].mapped %}
+												{% endif %}
+											{% endif %}
+											{% if not firstImage %}
+												{% for it in variants %}
+													{% if firstImage is empty and it.primary_image is defined and it.primary_image|trim != '' %}
+														{% set firstImage = it.primary_image %}
+													{% endif %}
+												{% endfor %}
+											{% endif %}
+											<div
+												class="color-item2">
+												{# Render the derived or fallback color image and expose it via data-image for JS; hide broken images #}
+												<button type="button" class="color selectable-color" data-color="{{ color|e('html_attr') }}" title="{{ color }}" data-image="{{ firstImage|e('html_attr') }}">
+													{% if firstImage %}
+														<img src="{{ firstImage }}" alt="{{ color }}" style="max-width:48px; display:block;" onerror="this.style.display='none'; this.nextElementSibling && (this.nextElementSibling.style.display='inline-block');"/>
+													{% else %}
+														<span class="color-swatch" style="display:inline-block;width:24px;height:24px;border-radius:50%;background:#ccc;"></span>
+													{% endif %}
+													<span class="color-swatch" style="display:none;width:24px;height:24px;border-radius:50%;background:#ccc;"></span>
+												</button>
+											</div>
+										{% endfor %}
+									{% elseif items_mapping is defined and items_mapping|length > 0 %}
+										{# Fallback: render swatches from items_mapping when items_by_color is empty (e.g., all variants out of stock) #}
+										{% set seen_colors = [] %}
+										{% for m in items_mapping %}
+											{% set code = m.FarbCode_1 is defined and m.FarbCode_1|trim != '' ? m.FarbCode_1|trim : (m.FarbCode_1_descr|default('')|trim) %}
+											{% if code is not empty and (code not in seen_colors) %}
+												{% set seen_colors = seen_colors|merge([code]) %}
+												{% set firstImage = m.color_url|default('') %}
+												<div class="color-item2">
+													<button type="button" class="color selectable-color" data-color="{{ code|e('html_attr') }}" title="{{ m.FarbCode_1_descr|default(code) }}" data-image="{{ firstImage|e('html_attr') }}">
+														{% if firstImage %}
+															<img src="{{ firstImage }}" alt="{{ m.FarbCode_1_descr|default(code) }}" style="max-width:48px; display:block;" onerror="this.style.display='none'; this.nextElementSibling && (this.nextElementSibling.style.display='inline-block');"/>
+														{% else %}
+															<span class="color-swatch" style="display:inline-block;width:24px;height:24px;border-radius:50%;background:#ccc;"></span>
+														{% endif %}
+													</button>
+												</div>
+											{% endif %}
+										{% endfor %}
+									{% endif %}
+								</div>
+								<div class="action-item3">
+									<div class="action-top">
+										<span class="action-title">Größe :</span>
+									</div>
+
+									<div
+										id="sizes-container">
+										{# Build a unique size list from items_mapping if available, else derive from items_by_color #}
+										{% set all_sizes = [] %}
+										{% if items_mapping is defined and items_mapping is iterable %}
+											{% for m in items_mapping %}
+												{% if m.SizeCode_descr is defined and m.SizeCode_descr|trim != '' %}
+													{% set all_sizes = all_sizes|merge([m.SizeCode_descr]) %}
+												{% endif %}
+											{% endfor %}
+										{% elseif items_by_color is defined and items_by_color is iterable %}
+											{% for color, variants in items_by_color %}
+												{% for v in variants %}
+													{% if v.SizeCode_descr is defined and v.SizeCode_descr|trim != '' %}
+														{% set all_sizes = all_sizes|merge([v.SizeCode_descr]) %}
+													{% endif %}
+												{% endfor %}
+											{% endfor %}
+											{% else %}
+											{# no size information available; leave all_sizes empty so template renders safely #}
+										{% endif %}
+										{# ensure uniqueness without relying on the 'unique' filter (some Twig installs lack it) #}
+										{% set uniq_sizes = [] %}
+										{% for sz in all_sizes %}
+											{% if sz is not empty and (sz not in uniq_sizes) %}
+												{% set uniq_sizes = uniq_sizes|merge([sz]) %}
+											{% endif %}
+										{% endfor %}
+
+										{% for sz in uniq_sizes %}
+											<div class="color-item2">
+												<button type="button" class="size selectable-size" data-size="{{ sz|e('html_attr') }}" disabled aria-pressed="false">{{ sz }}</button>
+											</div>
+										{% endfor %}
+									</div>
+								</div>
+								<p class="stock">{{ product.Published is defined and product.Published ? 'In Stock' : '' }}</p>
+								<div class="product-bottom-action">
+									<div class="cart-edit">
+										<div class="quantity-edit action-item">
+											<button type="button" class="button qty-decrease">
+												<i class="fal fa-minus minus"></i>
+											</button>
+											<input type="number" id="variant-quantity" class="input" value="1" min="1"/>
+											<button type="button" class="button plus qty-increase">+<i class="fal fa-plus plus"></i>
+											</button>
+										</div>
+									</div>
+									<button type="button" id="add-selected-to-cart" class="addto-cart-btn action-item">
+										<i class="rt-basket-shopping"></i>
+										In den Warenkorb
+									</button>
+								</div>
+								<div
+									class="product-uniques">
+									{# SKU: prefer Artikel_Nr, fallback to common alternatives #}
+									<span class="sku product-unipue">
+										<span>Artikelnummer:</span>
+										{{ product.Artikel_Nr|default(product.SKU|default(product.Artikel_Nr_Artikel|default(''))) }}
+									</span>
+									<span class="marke product-unipue">
+										<span>Marke:</span>
+										{{ product.Artikel_Marke|default(product.Artikel_Marke|default(product.Artikel_Marke|default(''))) }}
+									</span>									
+								</div>
+								<div class="share-social">
+									<span>Teilen:</span>
+									<a class="platform" href="http://facebook.com" target="_blank">
+										<i class="fab fa-facebook-f"></i>
+									</a>
+									<a class="platform" href="http://twitter.com" target="_blank">
+										<i class="fab fa-twitter"></i>
+									</a>
+									<a class="platform" href="http://behance.com" target="_blank">
+										<i class="fab fa-behance"></i>
+									</a>
+									<a class="platform" href="http://youtube.com" target="_blank">
+										<i class="fab fa-youtube"></i>
+									</a>
+									<a class="platform" href="http://linkedin.com" target="_blank">
+										<i class="fab fa-linkedin"></i>
+									</a>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+
+
+				{# Debug panel: show currently selected color, size and quantity for troubleshooting #}
+				{#
+				<div id="variant-debug" style="margin-top:12px;padding:10px;border:1px dashed #ccc;background:#fafafa;font-size:14px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+					<strong style="margin-right:6px;">Debug:</strong>
+					<div>Color:
+						<span id="debug-selected-color">-</span>
+					</div>
+					<div>Größe:
+						<span id="debug-selected-size">-</span>
+					</div>
+					<div>Quantity:
+						<input id="debug-quantity" type="number" value="1" min="1" style="width:68px;padding:4px;border:1px solid #ddd;border-radius:4px;"/></div>
+				</div>
+				#}
+				<div class="product-full-details-area product-full-details-area2">
+					<div class="details-filter-bar">
+						<button class="details-filter filter-btn active" data-show=".dls-one">Artikelbeschreibung</button>
+						<button class="details-filter filter-btn" data-show=".dls-two">Verfügbarkeit</button>
+						<button class="details-filter filter-btn" data-show=".dls-three">Bewertungen (0)</button>
+						<button class="details-filter filter-btn" data-show=".dls-four">Size Chart</button>
+					</div>
+					<div class="full-details dls-one filterd-items">
+						<div class="full-details-inner">
+							<p class="mb--30">
+							{{ product.Artikel_Beschreibung_DE|default(product.Artikel_Beschreibung_DE|default(product.Artikel_Beschreibung_DE|default('')))|raw }}
+							</p>
+													
+							</div>
+					</div>
+					<div class="full-details dls-two filterd-items hide">
+						<div class="full-details-inner">
+						<p class="mb--30">Sollte ein Produkt nicht ab Lager verfügbar sein, beziehen sich die Verfügbarkeiten auf Herstellerangaben, auf die wir keinen direkten Einfluss bei Änderungen haben.
+Wir werden dich umgehend informieren, sollten sich die Verfügbarkeiten durch die Hersteller ändern.</p>
+							<div class="table-responsive">
+						<table class="table table-sm table-striped" style="font-size:13px;">
+							<thead>
+								<tr>
+									<th>Farbe</th>
+									<th>Größe</th>
+									<th>Bestand</th>
+									<th>Lieferzeit</th>
+								</tr>
+							</thead>
+							<tbody>
+								{% for m in items_mapping %}
+									<tr>
+										<td>{{ m.FarbCode_1_descr|default('') }}</td>
+										<td>{{ m.SizeCode_descr|default('') }}</td>
+										<td>{{ m.Online_Bestand|default('') }}</td>
+										<td>{{ m.Online_Lieferzeit|default('') }}</td>
+									</tr>
+								{% endfor %}
+							</tbody>
+						</table>
+					</div>
+						</div>
+					</div>
+					<div class="full-details dls-three filterd-items hide">
+						<div class="full-details-inner">
+							<p>There are no reveiws yet.</p>
+							<div class="row">
+								<div class="col-lg-12 col-md-12 mr-10">
+									<div class="reveiw-form">
+										<h2 class="section-title">
+											Be the first to reveiw
+											<strong>
+												<a href="{{ path('productDetails') }}">"Wide Cotton
+																																																																																																																																																					                                                Tunic Dress"</a>
+											</strong>
+										</h2>
+										<h4 class="sect-title">Your email address will not be published. Required fields are
+																																																																																																																													                                        marked*
+										</h4>
+										<div class="reveiw-form-main mb-10">
+											<div class="contact-form">
+												<div class="row">
+													<div class="col-lg-6 col-sm-12">
+														<div class="input-box text-input mb-20">
+															<textarea name="Message" id="validationDefault01" cols="30" rows="10" placeholder="Your Review*" required></textarea>
+														</div>
+													</div>
+													<div class="col-lg-6 col-sm-12">
+														<div class="col-lg-12">
+															<div class="input-box mb-20">
+																<input type="text" id="validationDefault02" placeholder="Name*" required>
+															</div>
+														</div>
+														<div class="col-lg-12">
+															<div class="input-box mail-input mb-20">
+																<input type="text" id="validationDefault03" placeholder="E-mail*" required>
+															</div>
+														</div>
+														<div class="col-lg-12">
+															<div class="rating">
+																<p>Your Rating :</p>
+																<div class="rating-icon">
+																	<span class="one">
+																		<a href="#">
+																			<i class="fal fa-star"></i>
+																		</a>
+																	</span>
+																	<span class="two">
+																		<a href="#">
+																			<i class="fal fa-star"></i>
+																		</a>
+																	</span>
+																	<span class="three">
+																		<a href="#">
+																			<i class="fal fa-star"></i>
+																		</a>
+																	</span>
+																	<span class="four">
+																		<a href="#">
+																			<i class="fal fa-star"></i>
+																		</a>
+																	</span>
+																	<span class="five">
+																		<a href="#">
+																			<i class="fal fa-star"></i>
+																		</a>
+																	</span>
+																</div>
+															</div>
+														</div>
+														<div class="col-12 mb-15">
+															<button class="form-btn form-btn4">
+																Submit
+																<i class="fal fa-long-arrow-right"></i>
+															</button>
+														</div>
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="full-details dls-four filterd-items hide">
+						<div class="full-details-inner">
+							<p class="mb--30">In marketing a product is an object or system made available for consumer use
+																																																																																									                            it is anything that can be offered to a market to satisfy the desire or need of a customer.
+																																																																																									                            In retailing, products are
+																																																																																									                            merchandise in project management, products are the formal definition of the project
+																																																																																									                            deliverables that
+																																																																																									                            to delivering the objectives of the project.</p>
+							<p>A product can be classified as tangible or intangible. A tangible product is a physical
+																																																																																									                            object that can be perceived by touch such as a building, vehicle, gadget, or clothing. An
+																																																																																									                            intangible product is
+																																																																																									                            can only be perceived indirectly such as an insurance policy. Services can be broadly
+																																																																																									                            classified under intangible products which can be durable or non durable. A product line is
+																																																																																									                            "a group of
+																																																																																									                            closely related, either because they function in a similar manner, are sold to the same
+																																																																																									                            customer groups, are marketed through the same types of outlets, or fall within given price
+																																																																																									                            ranges."Many
+																																																																																									                            range of product lines which may be unique to a single organisation or may be common across
+																																																																																									                            the business's industry. In 2002 the US Census compiled revenue figures for the finance and
+																																																																																									                            various product lines such as "accident, health and medical insurance premiums" and "income
+																																																																																									                            from secured consumer loans.</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- ..::Product-details Section End Here::.. -->
+
+		<!-- ..::Related Product Section Start Here::.. -->
+	<div class="rts-featured-product-section1 related-product">
+		<div class="container">
+			<div class="rts-featured-product-section-inner">
+				<div class="section-header section-header3 section-header6">
+					<div class="wrapper">
+						<h2 class="title">RELATED PRODUCT</h2>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-xl-3 col-md-4 col-sm-6 col-12">
+						<div class="product-item element-item1">
+							<a href="{{ path('productDetails') }}" class="product-image image-hover-variations">
+								<div class="image-vari1 image-vari"><img src="{{ asset('/assets/images/hand-picked/slider-img13-1.webp') }}" alt="product-image">
+								</div>
+								<div class="image-vari2 image-vari"><img src="{{ asset('/assets/images/hand-picked/slider-img13.webp') }}" alt="product-image">
+								</div>
+							</a>
+							<div class="bottom-content">
+								<div class="star-rating">
+									<i class="fas fa-star"></i>
+									<i class="fas fa-star"></i>
+									<i class="fas fa-star"></i>
+									<i class="fas fa-star"></i>
+									<i class="fas fa-star"></i>
+								</div>
+								<a href="{{ path('productDetails') }}" class="product-name">Girl's Sport Bra</a>
+								<div class="action-wrap">
+									<span class="price">$31.00</span>
+								</div>
+							</div>
+							<div class="quick-action-button">
+								<div class="cta-single cta-plus">
+									<a href="#">
+										<i class="rt-plus"></i>
+									</a>
+								</div>
+								<div class="cta-single cta-quickview">
+									<a href="#">
+										<i class="far fa-eye"></i>
+									</a>
+								</div>
+								<div class="cta-single cta-addtocart">
+									<a href="#">
+										<i class="rt-basket-shopping"></i>
+									</a>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="col-xl-3 col-md-4 col-sm-6 col-12">
+						<div class="product-item element-item1">
+							<a href="{{ path('productDetails') }}" class="product-image image-hover-variations">
+								<div class="image-vari1 image-vari"><img src="{{ asset('/assets/images/hand-picked/slider-img14.webp') }}" alt="product-image">
+								</div>
+								<div class="image-vari2 image-vari"><img src="{{ asset('/assets/images/hand-picked/slider-img14-1.webp') }}" alt="product-image">
+								</div>
+							</a>
+							<div class="bottom-content">
+								<div class="star-rating">
+									<i class="fas fa-star"></i>
+									<i class="fas fa-star"></i>
+									<i class="fas fa-star"></i>
+									<i class="fas fa-star"></i>
+									<i class="fas fa-star"></i>
+								</div>
+								<a href="{{ path('productDetails') }}" class="product-name">Girl's Sport Bra</a>
+								<div class="action-wrap">
+									<span class="price">$31.00</span>
+								</div>
+							</div>
+							<div class="quick-action-button">
+								<div class="cta-single cta-plus">
+									<a href="#">
+										<i class="rt-plus"></i>
+									</a>
+								</div>
+								<div class="cta-single cta-quickview">
+									<a href="#">
+										<i class="far fa-eye"></i>
+									</a>
+								</div>
+
+								<div class="cta-single cta-addtocart">
+									<a href="#">
+										<i class="rt-basket-shopping"></i>
+									</a>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="col-xl-3 col-md-4 col-sm-6 col-12">
+						<div class="product-item element-item2">
+							<a href="{{ path('productDetails') }}" class="product-image image-slider-variations">
+								<div class="swiper productSlide">
+									<div class="swiper-wrapper">
+										<div class="swiper-slide">
+											<div class="image-vari1 image-vari"><img src="{{ asset('/assets/images/hand-picked/slider-img12-1.webp') }}" alt="product-image">
+											</div>
+										</div>
+										<div class="swiper-slide">
+											<div class="image-vari2 image-vari"><img src="{{ asset('/assets/images/hand-picked/slider-img11_1.webp') }}" alt="product-image">
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="slider-buttons">
+									<div class="button-prev slider-btn">
+										<i class="rt-arrow-left-long"></i>
+									</div>
+									<div class="button-next slider-btn">
+										<i class="rt-arrow-right-long"></i>
+									</div>
+								</div>
+							</a>
+							<div class="bottom-content">
+								<div class="star-rating">
+									<i class="fas fa-star"></i>
+									<i class="fas fa-star"></i>
+									<i class="fas fa-star"></i>
+									<i class="fas fa-star"></i>
+									<i class="fas fa-star-half-alt"></i>
+								</div>
+								<a href="{{ path('productDetails') }}" class="product-name">Maidenform Bra</a>
+								<div class="action-wrap">
+									<span class="price">$31.00</span>
+								</div>
+							</div>
+							<div class="quick-action-button">
+								<div class="cta-single cta-plus">
+									<a href="#">
+										<i class="rt-plus"></i>
+									</a>
+								</div>
+								<div class="cta-single cta-quickview">
+									<a href="#">
+										<i class="far fa-eye"></i>
+									</a>
+								</div>
+								<div class="cta-single cta-addtocart">
+									<a href="#">
+										<i class="rt-basket-shopping"></i>
+									</a>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="col-xl-3 col-md-4 col-sm-6 col-12">
+						<div class="product-item element-item1">
+							<a href="{{ path('productDetails') }}" class="product-image image-hover-variations">
+								<div class="image-vari1 image-vari"><img src="{{ asset('/assets/images/hand-picked/slider-img12.webp') }}" alt="product-image">
+								</div>
+								<div class="image-vari2 image-vari"><img src="{{ asset('/assets/images/hand-picked/slider-img12-3.webp') }}" alt="product-image">
+								</div>
+							</a>
+							<div class="bottom-content">
+								<div class="star-rating">
+									<i class="far fa-star"></i>
+									<i class="far fa-star"></i>
+									<i class="far fa-star"></i>
+									<i class="far fa-star"></i>
+									<i class="far fa-star"></i>
+								</div>
+								<a href="{{ path('productDetails') }}" class="product-name">Hanes Women's Bra</a>
+								<div class="action-wrap">
+									<span class="price">$31.00</span>
+								</div>
+							</div>
+							<div class="quick-action-button">
+								<div class="cta-single cta-plus">
+									<a href="#">
+										<i class="rt-plus"></i>
+									</a>
+								</div>
+								<div class="cta-single cta-quickview">
+									<a href="#">
+										<i class="far fa-eye"></i>
+									</a>
+								</div>
+								<div class="cta-single cta-addtocart">
+									<a href="#">
+										<i class="rt-basket-shopping"></i>
+									</a>
+								</div>
+							</div>
+							<div class="product-features">
+								<div class="discount-tag product-tag">-38%</div>
+								<div class="new-tag product-tag">HOT</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- ..::Related Product Section End Here::.. -->
+
+		{# Inline script: prepare variant map and UI wiring #}
+		{% block javascripts %}
+			{{ parent() }}
+			{# Expose a small runtime config and load external JS for variant behavior #}
+			<script>
+				window.variableProductsConfig = window.variableProductsConfig || {};
+window.variableProductsConfig.itemsByColor = {{ items_by_color|default([])|json_encode(constant('JSON_UNESCAPED_UNICODE') b-or constant('JSON_PRETTY_PRINT'))|raw }} || {};
+window.variableProductsConfig.itemsMapping = {{ items_mapping|default([])|json_encode(constant('JSON_UNESCAPED_UNICODE') b-or constant('JSON_PRETTY_PRINT'))|raw }} || [];
+window.variableProductsConfig.colorsImagesPath = {{ (colors_images_path|default('/assets/images/farben'))|json_encode|raw }};
+window.variableProductsConfig.cartPath = {{ path('cart')|json_encode|raw }};
+			</script>
+			<script src="{{ asset('/assets/js/variableProducts.js') }}"></script>
+			<script src="{{ asset('/assets/js/product-thumbnail-slider.js') }}"></script>
+		{% endblock %}
+
+		{% block javascripts_extra %}
+			{# image insertion and DOM wiring moved to external JS (variableProducts.js) #}
+		{% endblock %}
+
+	{% endblock content %}

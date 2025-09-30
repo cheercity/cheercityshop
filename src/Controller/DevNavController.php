@@ -11,7 +11,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 final class DevNavController extends AbstractController
 {
-    #[Route('/dev/nav', name: 'dev_nav')]
+    #[Route('/debug/nav', name: 'debug_nav')]
     public function nav(FileMakerClient $fm, FileMakerLayoutRegistry $layouts, LoggerInterface $logger): Response
     {
         // Compute the navigation analysis and render it inside a shop-like layout
@@ -24,7 +24,7 @@ final class DevNavController extends AbstractController
         ]);
     }
 
-    #[Route('/dev/nav/inspect', name: 'dev_nav_inspect')]
+    #[Route('/debug/nav/inspect', name: 'debug_nav_inspect')]
     public function inspect(FileMakerClient $fm, FileMakerLayoutRegistry $layouts, LoggerInterface $logger): Response
     {
         $analysisResult = $this->analyzeNavigation($fm, $layouts, $logger);
@@ -50,14 +50,15 @@ final class DevNavController extends AbstractController
 
         $records = $res['response']['data'] ?? [];
 
-        $fields = [];
-        $samples = [];
-        $byInternalId = [];
+    $fields = [];
+    $samples = [];
+    $byInternalId = [];
         // we ignore Global_ID for navigation structure; use categroy_ID as primary
         $mapCat = [];
         $slugMap = [];
         $linkMap = [];
         $orphans = [];
+    $missingAliases = [];
 
         foreach ($records as $idx => $rec) {
             $f = $rec['fieldData'] ?? [];
@@ -92,6 +93,22 @@ final class DevNavController extends AbstractController
                 'fields' => $f,
                 'parentRaw' => (isset($f['parent_ID']) ? (string) $f['parent_ID'] : (isset($f['parentId']) ? (string) $f['parentId'] : (isset($f['Parent_ID']) ? (string) $f['Parent_ID'] : null))),
             ];
+
+            // capture whether this record has an explicit FileMaker alias field
+            $hasAlias = false;
+            if (!empty($f['alias'] ?? null) || !empty($f['Alias'] ?? null) || !empty($f['direct_link_SEO'] ?? null)) {
+                $hasAlias = true;
+            }
+            if (!$hasAlias) {
+                $missingAliases[] = [
+                    'internalId' => $internalId,
+                    'catId' => $catId,
+                    'recId' => $rec['recordId'] ?? null,
+                    'title' => $title,
+                    'parentRaw' => $byInternalId[$internalId]['parentRaw'] ?? null,
+                    'fields' => $f,
+                ];
+            }
 
             if ('' !== $catId) {
                 $mapCat[$catId] = $internalId;
@@ -265,11 +282,22 @@ final class DevNavController extends AbstractController
         if (isset($groups['cat00'])) {
             foreach ($groups['cat00'] as $val00 => $ids00) {
                 // derive representative title for this cat00 value from first internal id
+                // Prefer the record whose catId equals the group key as representative title
                 $repTitle00 = null;
                 foreach ($ids00 as $iidTemp) {
-                    if (!empty($byInternalId[$iidTemp]['title'])) {
-                        $repTitle00 = $byInternalId[$iidTemp]['title'];
+                    $cand = $byInternalId[$iidTemp] ?? null;
+                    if ($cand && isset($cand['catId']) && (string)$cand['catId'] === (string)$val00 && !empty($cand['title'])) {
+                        $repTitle00 = $cand['title'];
                         break;
+                    }
+                }
+                // fallback: any title from the group
+                if (null === $repTitle00) {
+                    foreach ($ids00 as $iidTemp) {
+                        if (!empty($byInternalId[$iidTemp]['title'])) {
+                            $repTitle00 = $byInternalId[$iidTemp]['title'];
+                            break;
+                        }
                     }
                 }
                 $repTitle00 = $repTitle00 ?? ('cat00-'.$val00);
@@ -283,11 +311,21 @@ final class DevNavController extends AbstractController
                             continue;
                         }
                         // derive representative title for cat01
+                        // prefer record whose catId equals cat01 value
                         $repTitle01 = null;
                         foreach ($ids01 as $iidTemp) {
-                            if (!empty($byInternalId[$iidTemp]['title'])) {
-                                $repTitle01 = $byInternalId[$iidTemp]['title'];
+                            $cand = $byInternalId[$iidTemp] ?? null;
+                            if ($cand && isset($cand['catId']) && (string)$cand['catId'] === (string)$val01 && !empty($cand['title'])) {
+                                $repTitle01 = $cand['title'];
                                 break;
+                            }
+                        }
+                        if (null === $repTitle01) {
+                            foreach ($ids01 as $iidTemp) {
+                                if (!empty($byInternalId[$iidTemp]['title'])) {
+                                    $repTitle01 = $byInternalId[$iidTemp]['title'];
+                                    break;
+                                }
                             }
                         }
                         $repTitle01 = $repTitle01 ?? ('cat01-'.$val01);
@@ -301,11 +339,21 @@ final class DevNavController extends AbstractController
                                     continue;
                                 }
                                 // rep title for cat02
+                                // prefer record whose catId equals cat02 value
                                 $repTitle02 = null;
                                 foreach ($ids02 as $iidTemp) {
-                                    if (!empty($byInternalId[$iidTemp]['title'])) {
-                                        $repTitle02 = $byInternalId[$iidTemp]['title'];
+                                    $cand = $byInternalId[$iidTemp] ?? null;
+                                    if ($cand && isset($cand['catId']) && (string)$cand['catId'] === (string)$val02 && !empty($cand['title'])) {
+                                        $repTitle02 = $cand['title'];
                                         break;
+                                    }
+                                }
+                                if (null === $repTitle02) {
+                                    foreach ($ids02 as $iidTemp) {
+                                        if (!empty($byInternalId[$iidTemp]['title'])) {
+                                            $repTitle02 = $byInternalId[$iidTemp]['title'];
+                                            break;
+                                        }
                                     }
                                 }
                                 $repTitle02 = $repTitle02 ?? ('cat02-'.$val02);
@@ -358,6 +406,7 @@ final class DevNavController extends AbstractController
             'recordCount' => count($records),
             'uniqueFieldNames' => array_values(array_keys($fields)),
             'sample' => $samples,
+            'missingAliases' => $missingAliases,
             'mapCatCount' => count($mapCat),
             'unresolvedParents' => $unresolvedParents,
             'orphans' => array_keys($unresolvedParents),
@@ -371,7 +420,7 @@ final class DevNavController extends AbstractController
         ];
     }
 
-    #[Route('/dev/nav/tree', name: 'dev_nav_tree')]
+    #[Route('/debug/nav/tree', name: 'debug_nav_tree')]
     public function tree(FileMakerClient $fm, FileMakerLayoutRegistry $layouts, LoggerInterface $logger): Response
     {
         $analysis = $this->analyzeNavigation($fm, $layouts, $logger);

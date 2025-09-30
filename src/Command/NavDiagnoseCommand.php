@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Command;
 
 use App\Service\NavService;
@@ -29,18 +30,21 @@ final class NavDiagnoseCommand extends Command
     public function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
-        $layout = (string)$input->getOption('layout');
-        $filterJson = (string)$input->getOption('filter');
-        $ttl = (int)$input->getOption('ttl');
-        $dump = (bool)$input->getOption('dump');
+        $layout = (string) $input->getOption('layout');
+        $filterJson = (string) $input->getOption('filter');
+        $ttl = (int) $input->getOption('ttl');
+        $dump = (bool) $input->getOption('dump');
 
         $filter = [];
-        if ($filterJson !== '') {
+        if ('' !== $filterJson) {
             try {
                 $decoded = json_decode($filterJson, true, 512, JSON_THROW_ON_ERROR);
-                if (is_array($decoded)) $filter = $decoded;
+                if (is_array($decoded)) {
+                    $filter = $decoded;
+                }
             } catch (\Throwable $e) {
-                $io->error('Invalid --filter JSON: ' . $e->getMessage());
+                $io->error('Invalid --filter JSON: '.$e->getMessage());
+
                 return Command::FAILURE;
             }
         }
@@ -51,9 +55,10 @@ final class NavDiagnoseCommand extends Command
         try {
             $tree = $this->nav->getMenu($layout, $filter, $ttl);
         } catch (\Throwable $e) {
-            $io->error('NavService threw an exception: ' . $e->getMessage());
+            $io->error('NavService threw an exception: '.$e->getMessage());
             // write to log as well
-            @file_put_contents(dirname(__DIR__, 2) . '/var/log/nav_diagnose.log', sprintf("[%s] exception: %s\n", date('c'), $e->getMessage()), FILE_APPEND);
+            @file_put_contents(dirname(__DIR__, 2).'/var/log/nav_diagnose.log', sprintf("[%s] exception: %s\n", date('c'), $e->getMessage()), FILE_APPEND);
+
             return Command::FAILURE;
         }
 
@@ -65,12 +70,16 @@ final class NavDiagnoseCommand extends Command
             'missing_href' => 0,
         ];
 
-        $walk = function(array $nodes, int $depth = 0) use (&$walk, &$stats) {
+        $walk = function (array $nodes, int $depth = 0) use (&$walk, &$stats) {
             $stats['max_depth'] = max($stats['max_depth'], $depth);
             foreach ($nodes as $n) {
-                $stats['total']++;
-                if (empty($n['id'])) $stats['missing_id']++;
-                if (empty($n['href'])) $stats['missing_href']++;
+                ++$stats['total'];
+                if (empty($n['id'])) {
+                    ++$stats['missing_id'];
+                }
+                if (empty($n['href'])) {
+                    ++$stats['missing_href'];
+                }
                 if (!empty($n['children'])) {
                     $walk($n['children'], $depth + 1);
                 }
@@ -94,10 +103,11 @@ final class NavDiagnoseCommand extends Command
         }
 
         // write a short log
-        $logPath = dirname(__DIR__, 2) . '/var/log/nav_diagnose.log';
+        $logPath = dirname(__DIR__, 2).'/var/log/nav_diagnose.log';
         @file_put_contents($logPath, sprintf("[%s] nav_diagnose layout=%s total=%d max_depth=%d missing_id=%d missing_href=%d\n", date('c'), $layout, $stats['total'], $stats['max_depth'], $stats['missing_id'], $stats['missing_href']), FILE_APPEND);
 
         $io->success('Diagnosis complete. Log written to var/log/nav_diagnose.log');
+
         return Command::SUCCESS;
     }
 }

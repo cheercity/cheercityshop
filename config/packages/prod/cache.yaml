@@ -1,0 +1,16 @@
+framework:
+    cache:
+        # Production: use Redis as shared, fast cache backend for `cache.app`.
+        # We also enable a stable prefix_seed and define a tuned pool for the
+        # application so all consumers benefit from the namespace and TTL.
+        app: cache.adapter.redis
+        default_redis_provider: '%env(REDIS_URL)%'
+
+        # Stable namespace so cache keys don't collide between apps/environments.
+        prefix_seed: 'cheercity_app_%kernel.environment%'
+
+        # The tuned pool `cache.app.tuned` is defined in
+        # `config/packages/prod/cache_advanced.yaml`. We avoid redefining a pool
+        # with the reserved name `cache.app` here to prevent configuration errors.
+        # The service alias (see config/services_prod.yaml) will point `cache.app`
+        # at the tuned pool at runtime.

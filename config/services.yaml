@@ -1,4 +1,38 @@
-parameters: { }
+parameters:
+  # FileMaker Layout Namen aus .env (Fallbacks werden direkt in Code gesetzt, falls ENV fehlt)
+  fm.layout.login: 'sym_Login'
+  fm.layout.kunden: 'sym_Kunden'
+  fm.layout.orders: 'sym_Orders'
+  fm.layout.orders_items: 'sym_Orders_items'
+  fm.layout.artikel: 'sym_Artikel'
+  fm.layout.artikel_items: 'sym_Artikel_items'
+  fm.layout.artikel_items_images: 'sym_Artikel_items_images'
+  fm.layout.banner: 'sym_Banner'
+  fm.layout.module: 'sym_Module'
+  fm.layout.navigation: 'sym_Navigation'
+  fm.layout.content: 'sym_Content'
+  fm.layout.product: 'sym_Product'
+  fm.layout.users: 'sym_Users'
+  fm.layouts:
+    login: '%fm.layout.login%'
+    kunden: '%fm.layout.kunden%'
+    orders: '%fm.layout.orders%'
+    orders_items: '%fm.layout.orders_items%'
+    artikel: '%fm.layout.artikel%'
+    artikel_items: '%fm.layout.artikel_items%'
+    artikel_items_images: '%fm.layout.artikel_items_images%'
+    banner: '%fm.layout.banner%'
+    module: '%fm.layout.module%'
+    navigation: '%fm.layout.navigation%'
+    content: '%fm.layout.content%'
+  product: '%fm.layout.product%'
+  users: '%fm.layout.users%'
+  # Menu images path (can be overridden via env MENU_IMAGES_PATH)
+  menu_images_path: '%env(resolve:MENU_IMAGES_PATH)%'
+  # Image paths for product templates (defaults can be overridden via env)
+  colors_images_path: '%env(resolve:COLORS_IMAGES_PATH)%'
+  products_images_path: '%env(resolve:PRODUCTS_IMAGES_PATH)%'
+  brands_images_path: '%env(resolve:BRANDS_IMAGES_PATH)%'
 
 services:
   _defaults:
@@ -13,12 +47,49 @@ services:
 
   # FileMaker Client mit ENV-Argumenten
   App\Service\FileMakerClient:
+    # We deliberately do not resolve FM_* env vars at container compile time
+    # to allow local dev without the FileMaker environment. Scalars are
+    # provided as null and the client will attempt to fallback to getenv().
     arguments:
-      $host: '%env(string:FM_HOST)%'
-      $db:   '%env(string:FM_DB)%'
-      $user: '%env(string:FM_USER)%'
-      $pass: '%env(string:FM_PASS)%'
+      $host: ~
+      $db: ~
+      $user: ~
+      $pass: ~
+      $cache: '@cache.app.tuned'
       
-  App\Service\NavService: ~
+  App\Service\NavService:
+    arguments:
+      $navigationLayout: '%fm.layout.navigation%'
+      $moduleLayout: '%fm.layout.module%'
+  App\Service\BannerService:
+    arguments:
+      $bannerLayout: '%fm.layout.banner%'
+  App\Service\FileMakerLayoutRegistry:
+    arguments:
+      $layouts: '%fm.layouts%'
   App\Twig\NavExtension:
     tags: ['twig.extension']
+  App\Twig\AssetVersionExtension:
+    tags: ['twig.extension']
+  App\Twig\NavAnalysisExtension:
+    tags: ['twig.extension']
+  App\Twig\FileMakerLayoutExtension:
+    tags: ['twig.extension']
+  App\Twig\WertelistenExtension:
+    tags: ['twig.extension']
+  App\Service\WertelistenService: ~
+
+  # Make menu images path available as a parameter for templates/services
+  # (Twig global mapping is set in config/packages/twig.yaml)
+
+  # Debug Panels (tag all panel classes automatically)
+  App\Debug\Panel\:
+    resource: '../src/Debug/Panel'
+    tags: ['app.debug_panel']
+
+  App\Debug\DebugFlags: ~
+
+  # Controller spezifische Layout Injection (kann bei Bedarf erweitert werden)
+  App\Controller\Debug\SymArtikelJsonDebugController:
+    arguments:
+      $artikelLayout: '%fm.layout.artikel%'

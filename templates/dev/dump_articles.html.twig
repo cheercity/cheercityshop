@@ -1,0 +1,20 @@
+{% extends 'layout/layout.html.twig' %}
+
+{% block content %}
+	<div class="container">
+		<h2>Article Dump</h2>
+		<p>Wrote
+			{{ count }}
+			articles to
+			<code>{{ path }}</code>
+		</p>
+		<h3>First 10 articles</h3>
+		<ul>
+			{% for a in articles|slice(0,10) %}
+				<li>{{ a.Artikel_Alias | default(a.Artikel_ID|default('n/a')) }}
+					-
+					{{ a.Artikel_Bezeichnung | default('no title') }}</li>
+			{% endfor %}
+		</ul>
+	</div>
+{% endblock %}

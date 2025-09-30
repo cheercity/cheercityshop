@@ -6,6 +6,12 @@ use Psr\Cache\CacheItemPoolInterface;
 
 final class NavService
 {
+    /**
+     * Last built alias->cat_sort map (kept for quick access after getMenu() runs)
+     * @var array<string,string>
+     */
+    private array $lastAliasMap = [];
+
     public function __construct(
         private FileMakerClient $fm,
         private CacheItemPoolInterface $cache,
@@ -17,17 +23,42 @@ final class NavService
     public function getMenu(
         ?string $layout = null,
         array $filter = ['Status' => '1'],
-        int $ttl = 300,
+        int $ttl = 1800,
     ): array {
         $layout = $layout ?: $this->navigationLayout;
         $cacheKey = 'nav_main_'.md5(json_encode([$layout, $filter]));
-        $item = $this->cache->getItem($cacheKey);
-        if ($item->isHit()) {
-            return $item->get();
+        $item = null;
+        // When ttl > 0 use cache; when ttl === 0 bypass cache to force fresh fetch (dev use-case)
+        if ($ttl > 0) {
+            $item = $this->cache->getItem($cacheKey);
+            if ($item->isHit()) {
+                $val = $item->get();
+                // Backwards-compatible: older cache entries stored the tree directly.
+                if (is_array($val) && isset($val['tree']) && isset($val['aliasMap'])) {
+                    // store aliasMap for getter convenience and return tree as before
+                    $this->lastAliasMap = $val['aliasMap'];
+                    return $val['tree'];
+                }
+                return $val;
+            }
         }
 
-        $records = $this->fm->find($layout, $filter, ['limit' => 1000]);
-        $flat = array_map(fn ($r) => $r['fieldData'] ?? [], $records);
+        $res = $this->fm->find($layout, $filter, ['limit' => 300]);
+        // FileMakerClient::find() returns the full FM response array. Extract the records list if present.
+        $records = [];
+        if (isset($res['response']) && isset($res['response']['data']) && is_array($res['response']['data'])) {
+            $records = $res['response']['data'];
+        } elseif (is_array($res)) {
+            // Defensive: if find() returned a plain array of records, accept it.
+            $records = $res;
+        }
+
+    $flat = array_map(fn ($r) => $r['fieldData'] ?? [], $records);
+        // Ensure we only work with active navigation items (Status == 1)
+        $flat = array_values(array_filter($flat, function ($x) {
+            $status = $x['Status'] ?? $x['status'] ?? null;
+            return ((string) $status === '1' || (int) $status === 1);
+        }));
 
         // Detect if records use legacy cat_sort (AA BB CC) scheme
         $usesCatSort = false;
@@ -37,6 +68,51 @@ final class NavService
                 break;
             }
         }
+
+        // Build alias -> cat_sort map (we only need alias and cat_sort per your spec)
+        // If cat_sort is missing, fall back to any available Category ID variant so
+        // slugs without explicit cat_sort in FileMaker can still be resolved.
+        $aliasMap = [];
+        foreach ($flat as $r) {
+            $alias = trim((string) ($r['alias'] ?? $r['Alias'] ?? ''));
+            if ('' === $alias) {
+                continue;
+            }
+            // primary: cat_sort
+            $catSortRaw = trim((string) ($r['cat_sort'] ?? ''));
+            if ($catSortRaw !== '') {
+                $aliasMap[strtolower($alias)] = $catSortRaw;
+                continue;
+            }
+
+            // fallback 1: any Category ID variant (Category_ID / categroy_ID / categoryId)
+            $categoryFallback = trim((string) ($r['Category_ID'] ?? $r['category_ID'] ?? $r['categroy_ID'] ?? $r['categoryId'] ?? ''));
+            if ($categoryFallback !== '') {
+                $aliasMap[strtolower($alias)] = $categoryFallback;
+                continue;
+            }
+
+            // fallback 2: sometimes the hierarchical fields (cat00/cat01/cat02) carry the
+            // grouping code — prefer the most specific non-empty (cat02 -> cat01 -> cat00)
+            $cat02 = trim((string) ($r['cat02'] ?? ''));
+            $cat01 = trim((string) ($r['cat01'] ?? ''));
+            $cat00 = trim((string) ($r['cat00'] ?? ''));
+            if ($cat02 !== '') {
+                $aliasMap[strtolower($alias)] = $cat02;
+                continue;
+            }
+            if ($cat01 !== '') {
+                $aliasMap[strtolower($alias)] = $cat01;
+                continue;
+            }
+            if ($cat00 !== '') {
+                $aliasMap[strtolower($alias)] = $cat00;
+                continue;
+            }
+            // if all fail: do not set a mapping (leave null)
+        }
+        // remember for getter if we end up returning immediately
+        $this->lastAliasMap = $aliasMap;
 
         if ($usesCatSort) {
             // Build by cat_sort code (AA BB CC -> level 0/1/2)
@@ -49,14 +125,29 @@ final class NavService
                 $cc = substr($catSort, 4, 2);
                 $code = $aa.$bb.$cc; // 6-digit code
 
+                // Label: use cat_title (explicit) as navigation text
                 $label = trim((string) ($x['cat_title'] ?? $x['title'] ?? $x['cat_descr_h1'] ?? '')) ?: '(ohne Titel)';
-                $href = trim((string) ($x['cat_link'] ?? $x['link'] ?? '/')) ?: '/';
-                // Prefer alias-based internal menu links when no explicit external href is provided
+                $rawLink = trim((string) ($x['cat_link'] ?? $x['link'] ?? ''));
+                // Prefer alias-based internal menu links for internal navigation
                 $alias = trim((string) ($x['alias'] ?? $x['Alias'] ?? ''));
-                if (('' === $href || '/' === $href || '/menu' === $href) && '' !== $alias) {
-                    $href = '/menu/'.$alias;
+
+                // ID: prefer the FileMaker field 'category_ID' (canonical) then fallback to legacy 'categroy_ID'
+                $id = (string) ($x['category_ID'] ?? $x['categroy_ID'] ?? $code ?: uniqid('nav_', true));
+
+                // Build href according to mapping: if cat02 is non-empty -> /kategorie/{alias} else /menu/{alias}
+                $cat02 = trim((string) ($x['cat02'] ?? ''));
+                if ('' !== $alias) {
+                    // Note: cat02 non-empty -> /kategorie, empty -> /menu
+                    $href = ($cat02 !== '' ? '/kategorie/' : '/menu/') . $alias;
+                } elseif ('' !== $rawLink) {
+                    $href = $rawLink;
+                } else {
+                    $href = '/';
                 }
-                $id = (string) ($x['categroy_ID'] ?? $x['category_ID'] ?? $code ?: uniqid('nav_', true));
+                // If rawLink is an absolute external URL (http(s)://), respect it instead of alias
+                if (!empty($rawLink) && preg_match('#^https?://#i', $rawLink)) {
+                    $href = $rawLink;
+                }
                 $order = (int) $catSort;
 
                 $level = 0;
@@ -72,8 +163,13 @@ final class NavService
                     'code' => $code,
                     'level' => $level,
                     'label' => $label,
+                    // expose alias/slug so templates can build /menu/{slug} links
+                    'alias' => $alias,
+                    'slug' => $alias ?: null,
                     'cat_descr_h1' => isset($x['cat_descr_h1']) ? (string) $x['cat_descr_h1'] : null,
+                    // keep both href (full computed link) and link for compatibility
                     'href' => $href,
+                    'link' => $href,
                     'target' => '_self',
                     'order' => $order,
                     'children' => [],
@@ -123,7 +219,7 @@ final class NavService
                 foreach ($nodes as &$n) {
                     if (isset($n['href'])) {
                         $h = trim((string) $n['href']);
-                        if (preg_match('/^cat_01$/', $h)) {
+                            if (preg_match('/^cat_01$/', $h)) {
                             $n['href'] = '/menu';
                         } elseif (preg_match('/^cat_02$/', $h)) {
                             $n['href'] = '/kategorie';
@@ -137,33 +233,55 @@ final class NavService
             };
             $normalizeHref($root);
 
-            $item->set($root)->expiresAfter($ttl);
-            $this->cache->save($item);
+            if ($ttl > 0 && null !== $item) {
+                // Store tree and aliasMap together for future reads
+                $item->set(['tree' => $root, 'aliasMap' => $aliasMap])->expiresAfter($ttl);
+                $this->cache->save($item);
+            }
             $this->writeDiagnoseLog($layout, $filter, $ttl, $root);
+
+            // persist aliasMap for runtime getter
+            $this->lastAliasMap = $aliasMap;
 
             return $root;
         }
 
         // Fallback: parent_id based normalization
         $norm = array_map(function (array $x) {
+            // Label: use cat_title (explicit) as navigation text
             $label = trim((string) ($x['cat_title'] ?? $x['title'] ?? $x['cat_descr_h1'] ?? '')) ?: '(ohne Titel)';
-            $href = trim((string) ($x['cat_link'] ?? $x['link'] ?? ''));
-            // Prefer alias-based internal menu links when no explicit external href is provided
+            $rawLink = trim((string) ($x['cat_link'] ?? $x['link'] ?? ''));
             $alias = trim((string) ($x['alias'] ?? $x['Alias'] ?? ''));
-            if ('' === $href && '' !== $alias) {
-                $href = '/menu/'.$alias;
-            }
-            if ('' === $href) {
+
+            // id = category_ID preferred then fallback to categroy_ID
+            $id = (string) ($x['category_ID'] ?? $x['categroy_ID'] ?? '');
+            $parent_id = (string) ($x['parent_ID'] ?? $x['parentId'] ?? '');
+
+            $cat02 = trim((string) ($x['cat02'] ?? ''));
+            if ('' !== $alias) {
+                // Note: cat02 non-empty -> /kategorie, empty -> /menu
+                    $href = ($cat02 !== '' ? '/kategorie/' : '/menu/') . $alias;
+            } elseif ('' !== $rawLink) {
+                $href = $rawLink;
+            } else {
                 $href = '/';
             }
+            if (!empty($rawLink) && preg_match('#^https?://#i', $rawLink)) {
+                $href = $rawLink;
+            }
+
             $target = '_self';
 
             return [
-                'id' => (string) ($x['categroy_ID'] ?? $x['category_ID'] ?? ''),
-                'parent_id' => (string) ($x['parent_ID'] ?? $x['parentId'] ?? ''),
+                'id' => $id,
+                'parent_id' => $parent_id,
                 'label' => $label,
+                // expose alias/slug so templates can build /menu/{slug} links
+                'alias' => $alias,
+                'slug' => $alias ?: null,
                 'cat_descr_h1' => isset($x['cat_descr_h1']) ? (string) $x['cat_descr_h1'] : null,
                 'href' => $href,
+                'link' => $href,
                 'target' => $target,
                 'order' => (int) ($x['cat_sort'] ?? 0),
             ];
@@ -204,7 +322,7 @@ final class NavService
         // Normalize legacy short codes coming from FileMaker in the fallback tree as well
         $normalizeHref = function (&$nodes) use (&$normalizeHref) {
             foreach ($nodes as &$n) {
-                if (isset($n['href'])) {
+                    if (isset($n['href'])) {
                     $h = trim((string) $n['href']);
                     if (preg_match('/^cat_0[01]$/', $h)) {
                         $n['href'] = '/menu';
@@ -221,11 +339,26 @@ final class NavService
 
         $normalizeHref($root);
 
-        $item->set($root)->expiresAfter($ttl);
-        $this->cache->save($item);
+        if ($ttl > 0 && null !== $item) {
+            $item->set(['tree' => $root, 'aliasMap' => $aliasMap])->expiresAfter($ttl);
+            $this->cache->save($item);
+        }
         $this->writeDiagnoseLog($layout, $filter, $ttl, $root);
 
+        // persist aliasMap for runtime getter
+        $this->lastAliasMap = $aliasMap;
+
         return $root;
+    }
+
+    /**
+     * Return alias => cat_sort mapping built during the last getMenu() run (or loaded from cache).
+     * Keys are normalized to lowercase for robust lookup.
+     * @return array<string,string>
+     */
+    public function getAliasToCatSort(): array
+    {
+        return $this->lastAliasMap;
     }
 
     private function writeDiagnoseLog(string $layout, array $filter, int $ttl, array $tree): void

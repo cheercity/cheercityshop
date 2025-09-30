@@ -1,0 +1,35 @@
+# FileMaker HTTP requests (HTTP client format)
+
+@base = http://localhost:8000/api/fm
+
+### Auth (create token)
+POST {{base}}/auth
+
+### Find (example)
+POST {{base}}/sym_Banner/find
+Content-Type: application/json
+
+{
+  "query": {},
+  "limit": 10
+}
+
+### Create (example)
+POST {{base}}/Kunden
+Content-Type: application/json
+
+{
+  "fieldData": {"Name": "Max Mustermann", "Email": "max@example.com"}
+}
+
+### Edit example
+PATCH {{base}}/Kunden/123
+Content-Type: application/json
+
+{
+  "fieldData": {"Email": "neu@example.com"},
+  "modId": 5
+}
+
+### Delete example
+DELETE {{base}}/Kunden/123

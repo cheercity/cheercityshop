@@ -1,0 +1,112 @@
+{% extends './layout/layout.html.twig' %}
+
+{% block content %}
+
+
+	<!-- ..::Shop Section Start Here::.. -->
+	<div class="rts-shop-section section-gap">
+		<div class="container">
+			<div class="row">
+				<div class="col-xl-12">
+					<div
+						class="shop-product-topbar">
+						{# dynamic item count (no server-side pagination yet) #}
+						<span class="items-onlist">Zeige 1-{{ products is defined ? (products|length) : 0 }}
+							von
+							{{ products is defined ? (products|length) : 0 }}
+							Artikeln</span>
+						<div class="filter-area">
+							<p class="select-area">
+								<select id="product-sort" class="select">
+									<option value="default">Sort by default</option>
+									<option value="latest">Sort by latest</option>
+									<option value="price-asc">Sort by price: low to high</option>
+									<option value="price-desc">Sort by price: high to low</option>
+								</select>
+							</p>
+						</div>
+					</div>
+					<div class="products-area products-area3" data-page-size="3">
+						<div class="row justify-content-center">
+							{# --- DYNAMIC PRODUCTS START --- #}
+							<!-- DYNAMIC PRODUCTS START -->
+								{% if products is defined and products|length > 0 %}
+								{# Determine current category alias: prefer controller-provided 'category_slug', then request attribute 'category' #}
+								{% set category_alias = category_slug is defined and category_slug ? category_slug : (app.request.attributes.get('category') is defined and app.request.attributes.get('category') ? app.request.attributes.get('category') : null) %}
+									{% for p in products %}
+									{# FileMaker field mapping provided by user #}
+									{# prefer user-provided spelling 'Artikel_Bezeichung_DE', fallback to 'Artikel_Bezeichnung_DE' #}
+									{% set title = p['Artikel_Bezeichung_DE'] is defined and p['Artikel_Bezeichung_DE'] ? p['Artikel_Bezeichung_DE'] : (p['Artikel_Bezeichnung_DE']|default('')) %}
+									{% set price_raw = p['Artikel_Preis_VK_Brutto_Online'] is defined and p['Artikel_Preis_VK_Brutto_Online'] ? (p['Artikel_Preis_VK_Brutto_Online']|replace({',': '.'}) + 0) : null %}
+									{% set img = p['direct_link_image']|default(null) %}
+									{% set features = p['Artikel_Merkmale']|default(null) %}
+									{# alias field (slug) - prefer FileMaker field 'Artikel_Alias', fallback to 'alias'/'Alias' #}
+									{% set alias = p['Artikel_Alias'] is defined and p['Artikel_Alias'] ? p['Artikel_Alias'] : (p['alias'] is defined and p['alias'] ? p['alias'] : (p['Alias'] is defined and p['Alias'] ? p['Alias'] : null)) %}
+									{# Build category-aware product link when possible, fallback to legacy product_show route #}
+										{% if alias %}
+											{% if category_alias %}
+											{% set link = path('category_product_show', {'category': category_alias, 'slug': alias}) %}
+										{% else %}
+											{% set link = path('product_show', {'slug': alias}) %}
+										{% endif %}
+									{% else %}
+										{% set link = '#' %}
+									{% endif %}
+									{# normalize image URL and render img on a single line to avoid accidental tag splits #}
+									{% set img_url = img ? (img|slice(0,4) == 'http' ? img : asset(img)) : asset('/assets/images/slider/image1.jpg') %}
+
+									<div class="col-xl-3 col-md-4 col-sm-6 product-tile" data-price="{{ price_raw is not null ? price_raw : '' }}" data-index="{{ loop.index0 }}">
+										<div class="product-item product-item2 element-item3">
+											<a href="{{ link }}" class="product-image">
+												<img src="{{ img_url }}" alt="{{ title|e }}"/>
+											</a>
+											<div class="bottom-content">
+												<a href="{{ link }}" class="product-name">{{ title }}</a>
+												<div class="action-wrap">
+													{% if price_raw is not null %}
+														<span class="product-price" style="display:inline-block !important; opacity:1 !important; visibility:visible !important;">{{ price_raw|number_format(2, ',', '.') }}
+															&euro;</span>
+													{% endif %}
+												</div>
+											</div>
+											<div class="product-features">
+												{% if features %}
+													{# Show current Artikel_Merkmale content as-is (escaped) with line breaks preserved #}
+													<div class="product-feature-raw">{{ features|e|nl2br }}</div>
+												{% endif %}
+											</div>
+											<div class="product-actions">
+												</a>
+												<a href="{{ link }}" class="product-action">
+													<i class="fal fa-eye"></i>
+												</a>
+											</div>
+										</div>
+									</div>
+								{% endfor %}
+							{% else %}
+								<div class="col-12">
+									<p>Für diese Kategorie wurden keine Produkte gefunden.</p>
+								</div>
+							{% endif %}
+							<!-- DYNAMIC PRODUCTS END -->
+							{# --- DYNAMIC PRODUCTS END --- #}
+						</div>
+					</div>
+					<div
+						class="product-pagination-area mt--20" data-page-size="3"><!-- Pagination controls are rendered dynamically by product-listing.js -->
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- ..::Shop Section Section End Here::.. -->
+
+	{# Product-details module removed per request: modal/popup block deleted #}
+
+{% endblock content %}
+
+{% block javascripts %}
+	{{ parent() }}
+	<script src="{{ asset('/assets/js/product-listing.js') }}?v={{ asset_version|default('1') }}"></script>
+{% endblock %}

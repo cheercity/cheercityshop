@@ -1,0 +1,23 @@
+C### Disabled monolog configuration - renamed to avoid requiring MonologBundle in environments without composer
+# Original file moved here. If you want MonologBundle, rename this file back to monolog.yaml and install symfony/monolog-bundle
+###
+### original contents:
+## monolog:
+##   channels: ['filemaker']
+##   handlers:
+##     main:
+##       type: fingers_crossed
+##       action_level: error
+##       handler: nested
+##     nested:
+##       type: stream
+##       path: "%kernel.logs_dir%/%kernel.environment%.log"
+##       level: debug
+##     console:
+##       type: console
+##       channels: [ '!event' ]
+##     filemaker:
+##       type: stream
+##       path: "%kernel.logs_dir%/filemaker.log"
+##       level: info
+##       channels: [ 'filemaker' ]

@@ -1,0 +1,15 @@
+{% extends 'layout/layout.html.twig' %}
+
+{% block content %}
+	<div class="container mt-4 page-content">
+		<h1>{{ title }}</h1>
+		{% if content_de_html is defined and content_de_html is not empty %}
+			<div class="servicer-content">{{ content_de_html|raw }}</div>
+		{% else %}
+			<div class="mb-3">
+				<label for="servicer-content" class="form-label">Content</label>
+				<textarea id="servicer-content" class="form-control" rows="6" placeholder="Gib hier deinen Text ein..."></textarea>
+			</div>
+		{% endif %}
+	</div>
+{% endblock %}

@@ -1,0 +1,16 @@
+[
+  {
+    "slug": "wide-cotton-tunic-dress",
+    "title": "Wide Cotton Tunic Dress",
+    "price": "7.25",
+    "image": "/assets/images/products/product-details.jpg",
+    "description": "A comfortable wide cotton tunic dress. Perfect for casual wear."
+  },
+  {
+    "slug": "parachute-jacket",
+    "title": "Parachute Jacket",
+    "price": "198.00",
+    "image": "/assets/images/hand-picked/slider-img13.webp",
+    "description": "Lightweight parachute jacket with water-resistant shell."
+  }
+]

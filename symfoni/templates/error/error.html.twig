@@ -1,0 +1,39 @@
+{% extends 'layout/layout.html.twig' %}
+
+{% block title %}Fehler {{ status_code }} - {{ parent() }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 text-center">
+            <div class="card">
+                <div class="card-body">
+                    <div class="display-1 text-danger mb-4">{{ status_code }}</div>
+                    <h1 class="card-title">{{ status_text }}</h1>
+                    <p class="card-text text-muted">
+                        {% if status_code == 404 %}
+                            Die angeforderte Seite konnte nicht gefunden werden.
+                        {% elseif status_code == 403 %}
+                            Sie haben keine Berechtigung, diese Seite aufzurufen.
+                        {% elseif status_code == 500 %}
+                            Ein interner Serverfehler ist aufgetreten.
+                        {% else %}
+                            Es ist ein Fehler aufgetreten.
+                        {% endif %}
+                    </p>
+                    <div class="mt-4">
+                        <a href="{{ path('home') }}" class="btn btn-primary me-2">
+                            <i class="fas fa-home me-1"></i>
+                            Zur Startseite
+                        </a>
+                        <a href="{{ path('debug_index') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-bug me-1"></i>
+                            Debug Center
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

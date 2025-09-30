@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Command;
 
 use App\Service\NavService;
@@ -25,15 +26,17 @@ final class CheckNavCommand extends Command
         try {
             $items = $this->nav->getMenu();
         } catch (\Throwable $e) {
-            $this->logger->error('CheckNavCommand: getMenu threw exception: ' . $e->getMessage(), ['exception' => $e]);
-            $io->error('getMenu failed with exception: ' . $e->getMessage());
+            $this->logger->error('CheckNavCommand: getMenu threw exception: '.$e->getMessage(), ['exception' => $e]);
+            $io->error('getMenu failed with exception: '.$e->getMessage());
+
             return Command::FAILURE;
         }
 
         if (empty($items)) {
-            $io->warning('getMenu returned an empty array. Possible causes:' . PHP_EOL .
-                '- missing/invalid FM_* env vars' . PHP_EOL .
-                '- FileMaker authentication/network error' . PHP_EOL .
+            $io->warning(
+                'getMenu returned an empty array. Possible causes:'.PHP_EOL.
+                '- missing/invalid FM_* env vars'.PHP_EOL.
+                '- FileMaker authentication/network error'.PHP_EOL.
                 '- layout/filter returned no records'
             );
             $this->logger->warning('CheckNavCommand: getMenu returned empty array');

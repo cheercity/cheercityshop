@@ -1,0 +1,5 @@
+framework:
+    cache:
+        # Development: use filesystem adapter so local runs are deterministic and
+        # we can measure persistent cache effects without Redis.
+        app: cache.adapter.filesystem

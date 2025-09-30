@@ -1,0 +1,50 @@
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WEIBOO - E-commerce HTML Template1</title>
+    <!-- ..::Favicon::.. -->
+    <link rel="apple-touch-icon"  href="{{ asset('/assets/images/fav.png') }}">
+    <link rel="shortcut icon" type="image/x-icon"  href="{{ asset('/assets/images/fav.png') }}">
+    <!-- ..::Bootstrap V5 CSS::.. -->
+    <link rel="stylesheet" type="text/css"  href="{{ asset('/assets/css/bootstrap.min.css') }}?v={{ asset_version }}">
+    <!-- ..::Font Awesome 5 CSS::.. -->
+    <link rel="stylesheet" type="text/css"  href="{{ asset('/assets/css/all.min.css') }}?v={{ asset_version }}">
+    <!-- ..::RT Icons CSS::.. -->
+    <link rel="stylesheet" type="text/css"  href="{{ asset('/assets/css/rt-icons.css') }}?v={{ asset_version }}">
+    <!-- ..::Animate css::.. -->
+    <link rel="stylesheet" type="text/css"  href="{{ asset('/assets/css/animate.min.css') }}?v={{ asset_version }}">
+        {% if css2 is defined and css2 %}
+            {% if css2 is iterable %}
+                {% for path in css2 %}
+                    <link rel="stylesheet" href="{{ asset(path) }}?v={{ asset_version }}">
+                {% endfor %}
+            {% else %}
+                {{ css2|raw }}
+            {% endif %}
+        {% endif %}
+    <!-- ..::Magnific popup Plugin::.. -->
+    <link rel="stylesheet" type="text/css"  href="{{ asset('/assets/css/magnific-popup.css') }}?v={{ asset_version }}">
+    <!-- ..::Swiper Slider Plugin::.. -->
+    <link rel="stylesheet" type="text/css"  href="{{ asset('/assets/css/swiper-bundle.min.css') }}?v={{ asset_version }}">
+    <!-- ..::Mobile Menu CSS::.. -->
+    <link rel="stylesheet" type="text/css"  href="{{ asset('/assets/css/metisMenu.css') }}?v={{ asset_version }}">
+    <!-- ..::Main Menu CSS::.. -->
+    <link rel="stylesheet" type="text/css"  href="{{ asset('/assets/css/rtsmenu.css') }}?v={{ asset_version }}">
+    <!-- ..::Preloader CSS::.. -->
+    <link rel="stylesheet" type="text/css"  href="{{ asset('/assets/css/preloader.css') }}?v={{ asset_version }}">
+    <!-- ..::Main Stylesheet::.. -->
+    <link rel="stylesheet" type="text/css"  href="{{ asset('/assets/css/main.css') }}?v={{ asset_version }}">
+    <!-- ..::Modern Search Styles::.. -->
+    <link rel="stylesheet" type="text/css"  href="{{ asset('/assets/css/modern-search.css') }}?v={{ asset_version }}">
+
+    {% if css is defined and css %}
+        {% if css is iterable %}
+            {% for path in css %}
+                <link rel="stylesheet" href="{{ asset(path) }}?v={{ asset_version }}">
+            {% endfor %}
+        {% else %}
+            {{ css|raw }}
+        {% endif %}
+    {% endif %}
+</head>

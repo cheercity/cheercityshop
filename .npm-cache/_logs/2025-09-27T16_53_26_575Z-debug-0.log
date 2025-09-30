@@ -1,0 +1,247 @@
+0 verbose cli /usr/local/bin/node /usr/local/bin/npm
+1 info using npm@10.8.2
+2 info using node@v18.20.8
+3 silly config load:file:/usr/local/lib/node_modules/npm/npmrc
+4 silly config load:file:/Users/holgeradmin/Documents/symfoni/.npmrc
+5 silly config load:file:/Users/holgeradmin/.npmrc
+6 silly config load:file:/usr/local/etc/npmrc
+7 verbose title npm install
+8 verbose argv "install" "--cache" "/Users/holgeradmin/Documents/symfoni/.npm-cache" "--no-audit" "--no-fund"
+9 verbose logfile logs-max:10 dir:/Users/holgeradmin/Documents/symfoni/.npm-cache/_logs/2025-09-27T16_53_26_575Z-
+10 verbose logfile /Users/holgeradmin/Documents/symfoni/.npm-cache/_logs/2025-09-27T16_53_26_575Z-debug-0.log
+11 silly packumentCache heap:4345298944 maxSize:1086324736 maxEntrySize:543162368
+12 silly logfile done cleaning log files
+13 silly idealTree buildDeps
+14 silly fetch manifest onchange@^7.1.0
+15 silly packumentCache full:https://registry.npmjs.org/onchange cache-miss
+16 http fetch GET 200 https://registry.npmjs.org/onchange 7ms (cache hit)
+17 silly packumentCache full:https://registry.npmjs.org/onchange set size:87867 disposed:false
+18 silly placeDep ROOT onchange@7.1.0 OK for: cheercity-symfony-app@1.0.0 want: ^7.1.0
+19 silly fetch manifest @blakeembrey/deque@^1.0.5
+20 silly packumentCache full:https://registry.npmjs.org/@blakeembrey%2fdeque cache-miss
+21 silly fetch manifest @blakeembrey/template@^1.0.0
+22 silly packumentCache full:https://registry.npmjs.org/@blakeembrey%2ftemplate cache-miss
+23 silly fetch manifest arg@^4.1.3
+24 silly packumentCache full:https://registry.npmjs.org/arg cache-miss
+25 silly fetch manifest chokidar@^3.3.1
+26 silly packumentCache full:https://registry.npmjs.org/chokidar cache-miss
+27 silly fetch manifest cross-spawn@^7.0.1
+28 silly packumentCache full:https://registry.npmjs.org/cross-spawn cache-miss
+29 silly fetch manifest ignore@^5.1.4
+30 silly packumentCache full:https://registry.npmjs.org/ignore cache-miss
+31 silly fetch manifest tree-kill@^1.2.2
+32 silly packumentCache full:https://registry.npmjs.org/tree-kill cache-miss
+33 http fetch GET 200 https://registry.npmjs.org/@blakeembrey%2fdeque 5ms (cache hit)
+34 silly packumentCache full:https://registry.npmjs.org/@blakeembrey%2fdeque set size:25120 disposed:false
+35 http fetch GET 200 https://registry.npmjs.org/chokidar 5ms (cache hit)
+36 silly packumentCache full:https://registry.npmjs.org/chokidar set size:253451 disposed:false
+37 http fetch GET 200 https://registry.npmjs.org/cross-spawn 8ms (cache hit)
+38 silly packumentCache full:https://registry.npmjs.org/cross-spawn set size:109066 disposed:false
+39 http fetch GET 200 https://registry.npmjs.org/tree-kill 9ms (cache hit)
+40 silly packumentCache full:https://registry.npmjs.org/tree-kill set size:24180 disposed:false
+41 http fetch GET 200 https://registry.npmjs.org/arg 9ms (cache hit)
+42 silly packumentCache full:https://registry.npmjs.org/arg set size:67204 disposed:false
+43 http fetch GET 200 https://registry.npmjs.org/@blakeembrey%2ftemplate 10ms (cache hit)
+44 silly packumentCache full:https://registry.npmjs.org/@blakeembrey%2ftemplate set size:9996 disposed:false
+45 http fetch GET 200 https://registry.npmjs.org/ignore 10ms (cache hit)
+46 silly packumentCache full:https://registry.npmjs.org/ignore set size:237380 disposed:false
+47 silly placeDep ROOT @blakeembrey/deque@1.0.5 OK for: onchange@7.1.0 want: ^1.0.5
+48 silly placeDep ROOT @blakeembrey/template@1.2.0 OK for: onchange@7.1.0 want: ^1.0.0
+49 silly placeDep ROOT arg@4.1.3 OK for: onchange@7.1.0 want: ^4.1.3
+50 silly placeDep node_modules/onchange chokidar@3.6.0 OK for: onchange@7.1.0 want: ^3.3.1
+51 silly placeDep ROOT cross-spawn@7.0.6 OK for: onchange@7.1.0 want: ^7.0.1
+52 silly placeDep ROOT ignore@5.3.2 OK for: onchange@7.1.0 want: ^5.1.4
+53 silly placeDep ROOT tree-kill@1.2.2 OK for: onchange@7.1.0 want: ^1.2.2
+54 silly fetch manifest anymatch@~3.1.2
+55 silly packumentCache full:https://registry.npmjs.org/anymatch cache-miss
+56 silly fetch manifest readdirp@~3.6.0
+57 silly packumentCache full:https://registry.npmjs.org/readdirp cache-miss
+58 silly fetch manifest glob-parent@~5.1.2
+59 silly packumentCache full:https://registry.npmjs.org/glob-parent cache-miss
+60 silly fetch manifest is-binary-path@~2.1.0
+61 silly packumentCache full:https://registry.npmjs.org/is-binary-path cache-miss
+62 silly fetch manifest normalize-path@~3.0.0
+63 silly packumentCache full:https://registry.npmjs.org/normalize-path cache-miss
+64 silly fetch manifest fsevents@~2.3.2
+65 silly packumentCache full:https://registry.npmjs.org/fsevents cache-miss
+66 silly fetch manifest which@^2.0.1
+67 silly packumentCache full:https://registry.npmjs.org/which cache-miss
+68 silly fetch manifest path-key@^3.1.0
+69 silly packumentCache full:https://registry.npmjs.org/path-key cache-miss
+70 silly fetch manifest shebang-command@^2.0.0
+71 silly packumentCache full:https://registry.npmjs.org/shebang-command cache-miss
+72 http fetch GET 200 https://registry.npmjs.org/is-binary-path 6ms (cache hit)
+73 silly packumentCache full:https://registry.npmjs.org/is-binary-path set size:13475 disposed:false
+74 http fetch GET 200 https://registry.npmjs.org/anymatch 7ms (cache hit)
+75 silly packumentCache full:https://registry.npmjs.org/anymatch set size:42974 disposed:false
+76 http fetch GET 200 https://registry.npmjs.org/normalize-path 7ms (cache hit)
+77 silly packumentCache full:https://registry.npmjs.org/normalize-path set size:28713 disposed:false
+78 http fetch GET 200 https://registry.npmjs.org/path-key 6ms (cache hit)
+79 silly packumentCache full:https://registry.npmjs.org/path-key set size:16975 disposed:false
+80 http fetch GET 200 https://registry.npmjs.org/glob-parent 8ms (cache hit)
+81 silly packumentCache full:https://registry.npmjs.org/glob-parent set size:42445 disposed:false
+82 http fetch GET 200 https://registry.npmjs.org/shebang-command 7ms (cache hit)
+83 silly packumentCache full:https://registry.npmjs.org/shebang-command set size:8525 disposed:false
+84 http fetch GET 200 https://registry.npmjs.org/which 7ms (cache hit)
+85 silly packumentCache full:https://registry.npmjs.org/which set size:62722 disposed:false
+86 http fetch GET 200 https://registry.npmjs.org/fsevents 9ms (cache hit)
+87 silly packumentCache full:https://registry.npmjs.org/fsevents set size:182472 disposed:false
+88 http fetch GET 200 https://registry.npmjs.org/readdirp 10ms (cache hit)
+89 silly packumentCache full:https://registry.npmjs.org/readdirp set size:105089 disposed:false
+90 silly placeDep ROOT path-key@3.1.1 OK for: cross-spawn@7.0.6 want: ^3.1.0
+91 silly placeDep ROOT shebang-command@2.0.0 OK for: cross-spawn@7.0.6 want: ^2.0.0
+92 silly placeDep ROOT which@2.0.2 OK for: cross-spawn@7.0.6 want: ^2.0.1
+93 silly fetch manifest shebang-regex@^3.0.0
+94 silly packumentCache full:https://registry.npmjs.org/shebang-regex cache-miss
+95 silly fetch manifest isexe@^2.0.0
+96 silly packumentCache full:https://registry.npmjs.org/isexe cache-miss
+97 http fetch GET 200 https://registry.npmjs.org/shebang-regex 1ms (cache hit)
+98 silly packumentCache full:https://registry.npmjs.org/shebang-regex set size:9763 disposed:false
+99 http fetch GET 200 https://registry.npmjs.org/isexe 1ms (cache hit)
+100 silly packumentCache full:https://registry.npmjs.org/isexe set size:19340 disposed:false
+101 silly placeDep ROOT shebang-regex@3.0.0 OK for: shebang-command@2.0.0 want: ^3.0.0
+102 silly placeDep ROOT isexe@2.0.0 OK for: which@2.0.2 want: ^2.0.0
+103 silly placeDep ROOT anymatch@3.1.3 OK for: chokidar@3.6.0 want: ~3.1.2
+104 silly placeDep ROOT fsevents@2.3.3 OK for: chokidar@3.6.0 want: ~2.3.2
+105 silly placeDep ROOT glob-parent@5.1.2 OK for: chokidar@3.6.0 want: ~5.1.2
+106 silly placeDep ROOT is-binary-path@2.1.0 OK for: chokidar@3.6.0 want: ~2.1.0
+107 silly placeDep ROOT normalize-path@3.0.0 OK for: chokidar@3.6.0 want: ~3.0.0
+108 silly placeDep node_modules/onchange readdirp@3.6.0 OK for: chokidar@3.6.0 want: ~3.6.0
+109 silly fetch manifest normalize-path@^3.0.0
+110 silly packumentCache full:https://registry.npmjs.org/normalize-path cache-hit
+111 silly fetch manifest binary-extensions@^2.0.0
+112 silly packumentCache full:https://registry.npmjs.org/binary-extensions cache-miss
+113 http fetch GET 200 https://registry.npmjs.org/binary-extensions 1ms (cache hit)
+114 silly packumentCache full:https://registry.npmjs.org/binary-extensions set size:51551 disposed:false
+115 silly placeDep ROOT binary-extensions@2.3.0 OK for: is-binary-path@2.1.0 want: ^2.0.0
+116 silly reify moves {}
+117 verbose reify failed optional dependency /Users/holgeradmin/Documents/symfoni/node_modules/@parcel/watcher-win32-x64
+118 silly reify mark deleted [
+118 silly reify   '/Users/holgeradmin/Documents/symfoni/node_modules/@parcel/watcher-win32-x64'
+118 silly reify ]
+119 verbose reify failed optional dependency /Users/holgeradmin/Documents/symfoni/node_modules/@parcel/watcher-win32-ia32
+120 silly reify mark deleted [
+120 silly reify   '/Users/holgeradmin/Documents/symfoni/node_modules/@parcel/watcher-win32-ia32'
+120 silly reify ]
+121 verbose reify failed optional dependency /Users/holgeradmin/Documents/symfoni/node_modules/@parcel/watcher-win32-arm64
+122 silly reify mark deleted [
+122 silly reify   '/Users/holgeradmin/Documents/symfoni/node_modules/@parcel/watcher-win32-arm64'
+122 silly reify ]
+123 verbose reify failed optional dependency /Users/holgeradmin/Documents/symfoni/node_modules/@parcel/watcher-linux-x64-musl
+124 silly reify mark deleted [
+124 silly reify   '/Users/holgeradmin/Documents/symfoni/node_modules/@parcel/watcher-linux-x64-musl'
+124 silly reify ]
+125 verbose reify failed optional dependency /Users/holgeradmin/Documents/symfoni/node_modules/@parcel/watcher-linux-x64-glibc
+126 silly reify mark deleted [
+126 silly reify   '/Users/holgeradmin/Documents/symfoni/node_modules/@parcel/watcher-linux-x64-glibc'
+126 silly reify ]
+127 verbose reify failed optional dependency /Users/holgeradmin/Documents/symfoni/node_modules/@parcel/watcher-linux-arm64-musl
+128 silly reify mark deleted [
+128 silly reify   '/Users/holgeradmin/Documents/symfoni/node_modules/@parcel/watcher-linux-arm64-musl'
+128 silly reify ]
+129 verbose reify failed optional dependency /Users/holgeradmin/Documents/symfoni/node_modules/@parcel/watcher-linux-arm64-glibc
+130 silly reify mark deleted [
+130 silly reify   '/Users/holgeradmin/Documents/symfoni/node_modules/@parcel/watcher-linux-arm64-glibc'
+130 silly reify ]
+131 verbose reify failed optional dependency /Users/holgeradmin/Documents/symfoni/node_modules/@parcel/watcher-linux-arm-musl
+132 silly reify mark deleted [
+132 silly reify   '/Users/holgeradmin/Documents/symfoni/node_modules/@parcel/watcher-linux-arm-musl'
+132 silly reify ]
+133 verbose reify failed optional dependency /Users/holgeradmin/Documents/symfoni/node_modules/@parcel/watcher-linux-arm-glibc
+134 silly reify mark deleted [
+134 silly reify   '/Users/holgeradmin/Documents/symfoni/node_modules/@parcel/watcher-linux-arm-glibc'
+134 silly reify ]
+135 verbose reify failed optional dependency /Users/holgeradmin/Documents/symfoni/node_modules/@parcel/watcher-freebsd-x64
+136 silly reify mark deleted [
+136 silly reify   '/Users/holgeradmin/Documents/symfoni/node_modules/@parcel/watcher-freebsd-x64'
+136 silly reify ]
+137 verbose reify failed optional dependency /Users/holgeradmin/Documents/symfoni/node_modules/@parcel/watcher-darwin-x64
+138 silly reify mark deleted [
+138 silly reify   '/Users/holgeradmin/Documents/symfoni/node_modules/@parcel/watcher-darwin-x64'
+138 silly reify ]
+139 verbose reify failed optional dependency /Users/holgeradmin/Documents/symfoni/node_modules/@parcel/watcher-android-arm64
+140 silly reify mark deleted [
+140 silly reify   '/Users/holgeradmin/Documents/symfoni/node_modules/@parcel/watcher-android-arm64'
+140 silly reify ]
+141 silly tarball no local data for normalize-path@https://registry.npmjs.org/normalize-path/-/normalize-path-3.0.0.tgz. Extracting by manifest.
+142 silly tarball no local data for binary-extensions@https://registry.npmjs.org/binary-extensions/-/binary-extensions-2.3.0.tgz. Extracting by manifest.
+143 silly tarball no local data for is-binary-path@https://registry.npmjs.org/is-binary-path/-/is-binary-path-2.1.0.tgz. Extracting by manifest.
+144 silly tarball no local data for glob-parent@https://registry.npmjs.org/glob-parent/-/glob-parent-5.1.2.tgz. Extracting by manifest.
+145 silly tarball no local data for anymatch@https://registry.npmjs.org/anymatch/-/anymatch-3.1.3.tgz. Extracting by manifest.
+146 silly tarball no local data for fsevents@https://registry.npmjs.org/fsevents/-/fsevents-2.3.3.tgz. Extracting by manifest.
+147 silly tarball no local data for isexe@https://registry.npmjs.org/isexe/-/isexe-2.0.0.tgz. Extracting by manifest.
+148 silly tarball no local data for shebang-regex@https://registry.npmjs.org/shebang-regex/-/shebang-regex-3.0.0.tgz. Extracting by manifest.
+149 silly tarball no local data for shebang-command@https://registry.npmjs.org/shebang-command/-/shebang-command-2.0.0.tgz. Extracting by manifest.
+150 silly tarball no local data for which@https://registry.npmjs.org/which/-/which-2.0.2.tgz. Extracting by manifest.
+151 silly tarball no local data for tree-kill@https://registry.npmjs.org/tree-kill/-/tree-kill-1.2.2.tgz. Extracting by manifest.
+152 silly tarball no local data for path-key@https://registry.npmjs.org/path-key/-/path-key-3.1.1.tgz. Extracting by manifest.
+153 silly tarball no local data for ignore@https://registry.npmjs.org/ignore/-/ignore-5.3.2.tgz. Extracting by manifest.
+154 silly tarball no local data for cross-spawn@https://registry.npmjs.org/cross-spawn/-/cross-spawn-7.0.6.tgz. Extracting by manifest.
+155 silly tarball no local data for arg@https://registry.npmjs.org/arg/-/arg-4.1.3.tgz. Extracting by manifest.
+156 silly tarball no local data for @blakeembrey/template@https://registry.npmjs.org/@blakeembrey/template/-/template-1.2.0.tgz. Extracting by manifest.
+157 silly tarball no local data for @blakeembrey/deque@https://registry.npmjs.org/@blakeembrey/deque/-/deque-1.0.5.tgz. Extracting by manifest.
+158 silly tarball no local data for onchange@https://registry.npmjs.org/onchange/-/onchange-7.1.0.tgz. Extracting by manifest.
+159 silly tarball no local data for readdirp@https://registry.npmjs.org/readdirp/-/readdirp-3.6.0.tgz. Extracting by manifest.
+160 silly tarball no local data for chokidar@https://registry.npmjs.org/chokidar/-/chokidar-3.6.0.tgz. Extracting by manifest.
+161 http fetch GET 200 https://registry.npmjs.org/is-binary-path/-/is-binary-path-2.1.0.tgz 167ms (cache miss)
+162 http fetch GET 200 https://registry.npmjs.org/normalize-path/-/normalize-path-3.0.0.tgz 168ms (cache miss)
+163 http fetch GET 200 https://registry.npmjs.org/arg/-/arg-4.1.3.tgz 164ms (cache miss)
+164 http fetch GET 200 https://registry.npmjs.org/binary-extensions/-/binary-extensions-2.3.0.tgz 189ms (cache miss)
+165 http fetch GET 200 https://registry.npmjs.org/tree-kill/-/tree-kill-1.2.2.tgz 186ms (cache miss)
+166 http fetch GET 200 https://registry.npmjs.org/shebang-command/-/shebang-command-2.0.0.tgz 188ms (cache miss)
+167 http fetch GET 200 https://registry.npmjs.org/shebang-regex/-/shebang-regex-3.0.0.tgz 188ms (cache miss)
+168 http fetch GET 200 https://registry.npmjs.org/path-key/-/path-key-3.1.1.tgz 186ms (cache miss)
+169 http fetch GET 200 https://registry.npmjs.org/glob-parent/-/glob-parent-5.1.2.tgz 189ms (cache miss)
+170 http fetch GET 200 https://registry.npmjs.org/which/-/which-2.0.2.tgz 188ms (cache miss)
+171 http fetch GET 200 https://registry.npmjs.org/anymatch/-/anymatch-3.1.3.tgz 190ms (cache miss)
+172 http fetch GET 200 https://registry.npmjs.org/cross-spawn/-/cross-spawn-7.0.6.tgz 187ms (cache miss)
+173 http fetch GET 200 https://registry.npmjs.org/ignore/-/ignore-5.3.2.tgz 188ms (cache miss)
+174 http fetch GET 200 https://registry.npmjs.org/fsevents/-/fsevents-2.3.3.tgz 191ms (cache miss)
+175 http fetch GET 200 https://registry.npmjs.org/isexe/-/isexe-2.0.0.tgz 205ms (cache miss)
+176 http fetch GET 200 https://registry.npmjs.org/readdirp/-/readdirp-3.6.0.tgz 209ms (cache miss)
+177 http fetch GET 200 https://registry.npmjs.org/onchange/-/onchange-7.1.0.tgz 210ms (cache miss)
+178 http fetch GET 200 https://registry.npmjs.org/chokidar/-/chokidar-3.6.0.tgz 214ms (cache miss)
+179 http fetch GET 200 https://registry.npmjs.org/@blakeembrey/template/-/template-1.2.0.tgz 745ms (cache miss)
+180 http fetch GET 200 https://registry.npmjs.org/@blakeembrey/deque/-/deque-1.0.5.tgz 842ms (cache miss)
+181 info run fsevents@2.3.3 install node_modules/fsevents node-gyp rebuild
+182 info run fsevents@2.3.3 install { code: 1, signal: null }
+183 verbose reify failed optional dependency /Users/holgeradmin/Documents/symfoni/node_modules/fsevents
+184 silly reify mark deleted [ '/Users/holgeradmin/Documents/symfoni/node_modules/fsevents' ]
+185 silly ADD node_modules/binary-extensions
+186 silly ADD node_modules/normalize-path
+187 silly ADD node_modules/is-binary-path
+188 silly ADD node_modules/glob-parent
+189 silly ADD
+190 silly ADD node_modules/anymatch
+191 silly ADD node_modules/isexe
+192 silly ADD node_modules/shebang-regex
+193 silly ADD node_modules/which
+194 silly ADD node_modules/shebang-command
+195 silly ADD node_modules/path-key
+196 silly ADD node_modules/tree-kill
+197 silly ADD node_modules/ignore
+198 silly ADD node_modules/cross-spawn
+199 silly ADD node_modules/arg
+200 silly ADD node_modules/@blakeembrey/template
+201 silly ADD node_modules/@blakeembrey/deque
+202 silly ADD node_modules/onchange
+203 silly ADD node_modules/onchange/node_modules/readdirp
+204 silly ADD node_modules/onchange/node_modules/chokidar
+205 silly ADD
+206 silly ADD
+207 silly ADD
+208 silly ADD
+209 silly ADD
+210 silly ADD
+211 silly ADD
+212 silly ADD
+213 silly ADD
+214 silly ADD
+215 silly ADD
+216 silly ADD
+217 verbose cwd /Users/holgeradmin/Documents/symfoni
+218 verbose os Darwin 24.5.0
+219 verbose node v18.20.8
+220 verbose npm  v10.8.2
+221 verbose exit 0
+222 info ok

@@ -1,0 +1,226 @@
+{% extends './layout/layout.html.twig' %}
+
+{% block content %}
+
+    <!-- Dev Navigation (shop-style) -->
+    <div class="rts-shop-section section-gap">
+        <div class="container">
+            <div class="row">
+                <div class="col-xl-9">
+                    <div class="section-header text-left">
+                        <h2 class="title">Development Navigation — Inspector</h2>
+                        <p class="sub-text small text-muted">Records: {{ analysis.recordCount }} — max depth: {{ analysis.maxDepth }}</p>
+                    </div>
+
+                    <div class="rts-card mb-3">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <h5>Summary</h5>
+                                    <ul class="list-unstyled small">
+                                        <li><strong>Unique fields:</strong> {{ analysis.uniqueFieldNames|length }}</li>
+                                        <li><strong>Map Cat IDs:</strong> {{ analysis.mapCatCount }}</li>
+                                        <li><strong>Orphans:</strong> {{ analysis.orphans|length }}</li>
+                                        <li><strong>Duplicate slugs:</strong> {{ analysis.duplicateSlugs|length }}</li>
+                                        <li><strong>Duplicate links:</strong> {{ analysis.duplicateLinks|length }}</li>
+                                    </ul>
+                                    <h6>Groups preview</h6>
+                                    <ul class="small">
+                                        {% for gk, group in analysis.groups %}
+                                            <li><strong>{{ gk }}</strong>: {{ group|length }} distinct values</li>
+                                        {% endfor %}
+                                    </ul>
+                                    <a class="btn btn-sm btn-outline-secondary mt-2" href="{{ path('dev_nav_inspect') }}" target="_blank">Download JSON</a>
+                                </div>
+                                <div class="col-md-8">
+                                    <h5>Grouped Tree (cat00 → cat01 → cat02)</h5>
+                                    <div id="grouped-tree-app" class="grouped-tree">
+                                        <div class="gt-controls mb-2">
+                                            <input id="gt-search" type="search" class="form-control" placeholder="Search groups or samples..." />
+                                            <div class="mt-2 small">
+                                                <label><input id="gt-show-duplicates" type="checkbox" checked /> Highlight duplicates</label>
+                                                &nbsp; <label><input id="gt-show-orphans" type="checkbox" checked /> Highlight orphans</label>
+                                                &nbsp; <button id="gt-collapse-all" class="btn btn-sm btn-outline-secondary">Collapse all</button>
+                                                <button id="gt-expand-all" class="btn btn-sm btn-outline-secondary">Expand all</button>
+                                            </div>
+                                        </div>
+                                        <div id="gt-legend" class="mb-2 small text-muted">Tip: click a node to expand/collapse. Use the search box to filter visible nodes.</div>
+                                        <div id="gt-root"></div>
+                                        <pre id="gt-debug" style="display:none"></pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="rts-card mt-3">
+                        <div class="card-body">
+                            <h5>Tree (structured)</h5>
+                            <ul class="small">
+                                {% macro renderNode(node) %}
+                                    <li>
+                                        <strong>{{ node.title }}</strong>
+                                        {% if node.children is not empty %}
+                                            <ul>
+                                                {% for c in node.children %}
+                                                    {{ _self.renderNode(c) }}
+                                                {% endfor %}
+                                            </ul>
+                                        {% endif %}
+                                    </li>
+                                {% endmacro %}
+
+                                {% for root in analysis.tree %}
+                                    {{ _self.renderNode(root) }}
+                                {% else %}
+                                    <li><em>No tree data</em></li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3">
+                    <div class="side-sticky">
+                        <div class="shop-side-action">
+                            <div class="action-item">
+                                <div class="action-top">
+                                    <span class="action-title">DEV TOOLS</span>
+                                </div>
+                                <div class="action-body small">
+                                    <p><strong>Orphans</strong>: {{ analysis.orphans|length }}</p>
+                                    <p><strong>Cycles</strong>: {{ analysis.cyclesDetected|length }}</p>
+                                    <p><strong>Sample rows</strong>:</p>
+                                    <ul class="small">
+                                        {% for s in analysis.sample|slice(0,6) %}
+                                            <li>{{ s.internalId }} — {{ s.title ?: '(no title)' }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Inline JS/CSS reused from dev/nav_tree to render groupedTree dynamically #}
+    <script>
+        (function(){
+            const data = {{ analysis.groupedTree|json_encode|raw }};
+            const duplicateLinks = {{ analysis.duplicateLinks|json_encode|raw }};
+            const orphans = {{ analysis.orphans|json_encode|raw }};
+
+            function createNode(item, level){
+                const el = document.createElement('div');
+                el.className = 'gt-node level-' + level;
+                el.dataset.ids = (item.ids || []).join(',');
+                el.dataset.value = item.value;
+
+                const header = document.createElement('div');
+                header.className = 'gt-header';
+                const link = item.link ? escapeHtml(item.link) : '#';
+                header.innerHTML = `<span class="gt-toggle">▸</span> <a class="gt-link" href="${link}" target="_blank"><strong class="gt-title">${escapeHtml(item.value)}</strong></a> <span class="gt-count">(${item.count})</span>`;
+                el.appendChild(header);
+
+                if (item.sample && item.sample.length) {
+                    const s = document.createElement('div');
+                    s.className = 'gt-sample small text-muted';
+                    s.textContent = 'Sample: ' + item.sample.join(', ');
+                    el.appendChild(s);
+                }
+
+                const childrenWrap = document.createElement('div');
+                childrenWrap.className = 'gt-children';
+                if (item.children && item.children.length) {
+                    item.children.forEach(function(c){
+                        childrenWrap.appendChild(createNode(c, level+1));
+                    });
+                }
+                el.appendChild(childrenWrap);
+
+                header.addEventListener('click', function(){
+                    const collapsed = el.classList.toggle('collapsed');
+                    header.querySelector('.gt-toggle').textContent = collapsed ? '▸' : '▾';
+                });
+
+                return el;
+            }
+
+            function escapeHtml(s){
+                return String(s).replace(/[&"'<>]/g, function(c){
+                    return {'&':'&amp;','"':'&quot;','\'':'&#39;','<':'&lt;','>':'&gt;'}[c];
+                });
+            }
+
+            function nodeIds(el){
+                const ids = el.dataset.ids || '';
+                return ids === '' ? [] : ids.split(',').map(function(x){return x.trim();});
+            }
+
+            const root = document.getElementById('gt-root');
+            data.forEach(function(g0){ root.appendChild(createNode(g0, 0)); });
+
+            // helpers
+            function markDuplicates(show){
+                const dupIds = new Set();
+                Object.values(duplicateLinks).forEach(function(arr){ arr.forEach(id=>dupIds.add(String(id))); });
+                document.querySelectorAll('#gt-root .gt-node').forEach(function(n){
+                    const ids = nodeIds(n).map(String);
+                    const isDup = ids.some(id => dupIds.has(id));
+                    n.classList.toggle('gt-dup', show && isDup);
+                });
+            }
+
+            function markOrphans(show){
+                const orphanSet = new Set((orphans||[]).map(String));
+                document.querySelectorAll('#gt-root .gt-node').forEach(function(n){
+                    const ids = nodeIds(n).map(String);
+                    const isOrphan = ids.some(id => orphanSet.has(id));
+                    n.classList.toggle('gt-orphan', show && isOrphan);
+                });
+            }
+
+            function collapseAll(){ document.querySelectorAll('#gt-root .gt-node').forEach(n=>n.classList.add('collapsed')); document.querySelectorAll('#gt-root .gt-node .gt-toggle').forEach(t=>t.textContent='▸'); }
+            function expandAll(){ document.querySelectorAll('#gt-root .gt-node').forEach(n=>n.classList.remove('collapsed')); document.querySelectorAll('#gt-root .gt-node .gt-toggle').forEach(t=>t.textContent='▾'); }
+
+            document.getElementById('gt-collapse-all').addEventListener('click', collapseAll);
+            document.getElementById('gt-expand-all').addEventListener('click', expandAll);
+
+            document.getElementById('gt-show-duplicates').addEventListener('change', function(e){ markDuplicates(e.target.checked); });
+            document.getElementById('gt-show-orphans').addEventListener('change', function(e){ markOrphans(e.target.checked); });
+
+            // search
+            const searchInput = document.getElementById('gt-search');
+            function filterNodes(query){
+                query = (query||'').trim().toLowerCase();
+                document.querySelectorAll('#gt-root .gt-node').forEach(function(n){
+                    const title = (n.querySelector('.gt-title')?.textContent||'').toLowerCase();
+                    const sample = (n.querySelector('.gt-sample')?.textContent||'').toLowerCase();
+                    const match = query === '' || title.indexOf(query) !== -1 || sample.indexOf(query) !== -1 || (n.dataset.ids||'').indexOf(query) !== -1;
+                    n.style.display = match ? '' : 'none';
+                });
+            }
+            searchInput.addEventListener('input', function(e){ filterNodes(e.target.value); });
+
+            // initial markings
+            markDuplicates(document.getElementById('gt-show-duplicates').checked);
+            markOrphans(document.getElementById('gt-show-orphans').checked);
+
+            // collapse all initially for compactness
+            collapseAll();
+        })();
+    </script>
+
+    <style>
+        #grouped-tree-app .gt-node{border-left:1px dashed rgba(0,0,0,0.05); padding:6px 8px; margin:6px 0}
+        #grouped-tree-app .gt-node .gt-children{margin-left:16px}
+        #grouped-tree-app .gt-node.collapsed > .gt-children{display:none}
+        #grouped-tree-app .gt-node .gt-toggle{cursor:pointer; display:inline-block; width:18px}
+        #grouped-tree-app .gt-node.gt-dup{background: rgba(255,235,59,0.12);}
+        #grouped-tree-app .gt-node.gt-orphan{background: rgba(244,67,54,0.06);}
+        #grouped-tree-app .gt-sample{margin-top:4px}
+    </style>
+
+{% endblock %}

@@ -1,0 +1,797 @@
+<header id="rtsHeader">
+	<div class="header-topbar header-topbar1">
+		<div class="container">
+			<div class="header-top-area">
+				<div class="slider-div">
+					<div class="swiper rts-topSlide1">
+						<div class="swiper-wrapper">
+							<div class="swiper-slide">
+								<p class="welcome-text">
+									Open Door To A worlds Of Fashion<a href="#">Discover
+																																																																																																														                                                Now</a>
+								</p>
+							</div>
+							<div class="swiper-slide">
+								<p class="welcome-text">
+									Enjoy free shipping on orders 1000$ up
+									<a href="#">Discover
+																																																																																																														                                                Now</a>
+								</p>
+							</h3>
+						</div>
+						<div class="swiper-slide">
+							<p class="welcome-text">
+								Open Door To A worlds Of Fashion<a href="#">Discover
+																																																																																																			                                                Now</a>
+							</p>
+						</div>
+						<div class="swiper-slide">
+							<p class="welcome-text">
+								Enjoy free shipping on orders 1000$ up
+								<a href="#">Discover
+																																																																																																			                                                Now</a>
+							</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="header-topbar-menu-area header-topbar-menu-area9">
+	<div class="container">
+		<div class="menu-area1 menu-area9">
+			<div class="left-side">
+				<a href="{{ path('index') }}" class="logo">
+					<img src="{{ asset('assets/images/logo.png') }}" alt="CHEERCITY">
+				</a>
+			</div>
+			<div class="navbar-search-area navbar-search-area9">
+				<div class="search-input-inner">
+					<div class="input-div">
+						<input class="search-input input5" type="text" placeholder="Suche nach Cheerleading-Artikeln, Marken oder Kategorien..." id="modernSearchInput" autocomplete="off">
+						<div class="search-loading"></div>
+					</div>
+				</div>
+				<!-- Quick Search Suggestions -->
+				<div class="search-suggestions" id="searchSuggestions">
+					<div class="suggestion-item">Cheerleader Uniformen</div>
+					<div class="suggestion-item">Cheerleading Schuhe</div>
+					<div class="suggestion-item">Pom Poms</div>
+					<div class="suggestion-item">Team-Wear</div>
+					<div class="suggestion-item">NFINITY Schuhe</div>
+				</div>
+			</div>
+			<div class="menu-area-right-side">
+				<div class="contact">
+					<i aria-hidden="true" class="fas fa-phone"></i>
+					<strong>Hotline:
+						<a href="call:+499114777666">+49 (0) 911.4777666</a>
+					</strong>
+					<br/>Mo-Fr 10-13 Uhr und 15-18 Uhr</div>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="navbar-sticky">
+
+	<div class="navbar-part navbar-part1 navbar-part9">
+		<div class="container">
+			<div class="navbar-inner">
+
+				<div class="rts-menu">
+					<nav
+						class="menus menu-toggle">
+						{# Determine current route and whether we should show the special account/checkout nav #}
+						{% set current_route = app.request.attributes.get('_route')|default('') %}
+						{% set special_nav = current_route matches '/^(account|account_.*|checkOut|checkout|checkout_.*|order|order_.*)$/' %}
+						<ul class="nav__menu">
+							<!-- Menüpunkt 'Home' entfernt -->
+
+							{# If we have groupedTree (from /dev/nav/tree), render it in the mega-dropdown layout #}
+							{# Developer debug blocks removed for production hygiene. #}
+								{% if not special_nav and analysis is defined and analysis.groupedTree is not empty %}
+								{# Render catalog from groupedTree. NavService already computes proper node.link values (external or internal /menu/ or /kategorie/) #}
+									{% for cat00 in analysis.groupedTree %}
+									{% set cat00_link = cat00.link|default('#') %}
+										{% if cat00_link is not empty and cat00_link != '/' %}
+											<li class="has-dropdown"> <a class="menu-item" href="{{ cat00_link }}">{{ cat00.value }}
+												<i class="rt-plus"></i>
+											</a>
+											{% if cat00.children is not empty %}
+												<ul class="dropdown-ul mega-dropdown">
+													{% for cat01 in cat00.children %}
+														{% set cat01_link = cat01.link|default('#') %}
+														{% if cat01_link is not empty and cat01_link != '/' %}
+															<li class="mega-dropdown-li{% if loop.last %} last-child{% endif %}">
+																<ul class="mega-dropdown-ul">
+																	<li class="dropdown-li headline">
+																		<a class="dropdown-link2" href="{{ cat01_link }}" style="animation: none; transition: none;">
+																			<strong>{{ cat01.value }}</strong>
+																		</a>
+																	</li>
+																	{% if cat01.children is not empty %}
+																		{% for cat02 in cat01.children %}
+																			{% set cat02_link = cat02.link|default('#') %}
+																			{% if cat02_link is not empty and cat02_link != '/' %}
+																				<li class="dropdown-li">
+																					<a class="dropdown-link2" href="{{ cat02_link }}">{{ cat02.value }}</a>
+																				</li>
+																			{% endif %}
+																		{% endfor %}
+																	{% endif %}
+																</ul>
+															</li>
+														{% endif %}
+													{% endfor %}
+												</ul>
+											{% endif %}
+										</li>
+									{% endif %}
+								{% endfor %}
+							{% elseif not special_nav %}
+								{# Fallback: keep the original static Shop mega-menu layout #}
+								<li class="has-dropdown">
+									<a class="menu-item" href="#">Shop
+										<i class="rt-plus"></i>
+									</a>
+									<ul class="dropdown-ul mega-dropdown">
+										<li class="mega-dropdown-li">
+											<ul class="mega-dropdown-ul">
+												<li class="dropdown-li">
+													<a class="dropdown-link2" href="{{ path('shop') }}">Shop</a>
+												</li>
+												<li class="dropdown-li">
+													<a class="dropdown-link2" href="{{ path('sidebarLeft') }}">Left Sidebar Shop</a>
+												</li>
+												<li class="dropdown-li">
+													<a class="dropdown-link2" href="{{ path('sidebarRight') }}">Right Sidebar Shop</a>
+												</li>
+												<li class="dropdown-li">
+													<a class="dropdown-link2" href="{{ path('fullWidthShop') }}">Full Width Shop</a>
+												</li>
+											</ul>
+										</li>
+										<li class="mega-dropdown-li">
+											<ul class="mega-dropdown-ul">
+												<li class="dropdown-li">
+													<a class="dropdown-link2" href="{{ path('productDetails') }}">Single Product Layout One</a>
+												</li>
+												<li class="dropdown-li">
+													<a class="dropdown-link2" href="{{ path('productDetails2') }}">Single Product Layout Two</a>
+												</li>
+												<li class="dropdown-li">
+													<a class="dropdown-link2" href="{{ path('variableProducts') }}">Variable Product</a>
+												</li>
+												<li class="dropdown-li">
+													<a class="dropdown-link2" href="{{ path('groupedProducts') }}">Grouped Product</a>
+												</li>
+											</ul>
+										</li>
+										<li class="mega-dropdown-li last-child">
+											<ul class="mega-dropdown-ul">
+												<li class="dropdown-li">
+													<a class="dropdown-link2" href="{{ path('cart') }}">Cart</a>
+												</li>
+												<li class="dropdown-li">
+													<a class="dropdown-link2" href="{{ path('checkOut') }}">Checkout</a>
+												</li>
+												<li class="dropdown-li">
+													<a class="dropdown-link2" href="{{ path('account') }}">My Account</a>
+												</li>
+											</ul>
+										</li>
+									</ul>
+								</li>
+							{% else %}
+								{# Special simplified nav for account / checkout flow pages #}
+								<li>
+									<a class="menu-item" href="{{ path('home') }}">Start</a>
+								</li>
+								<li class="has-dropdown">
+									<a class="menu-item" href="{{ path('account') }}">Mein Konto
+										<i class="rt-plus"></i>
+									</a>
+									<ul class="dropdown-ul">
+										<li class="dropdown-li">
+											<a class="dropdown-link2" href="{{ path('account') }}">Übersicht</a>
+										</li>
+										<li class="dropdown-li">
+											<a class="dropdown-link2" href="{{ path('account_orders')|default(path('account')) }}">Bestellungen</a>
+										</li>
+										<li class="dropdown-li">
+											<a class="dropdown-link2" href="{{ path('account_addresses')|default(path('account')) }}">Adressen</a>
+										</li>
+									</ul>
+								</li>
+								<li>
+									<a class="menu-item" href="{{ path('cart') }}">Warenkorb</a>
+								</li>
+								<li>
+									<a class="menu-item" href="{{ path('checkOut') }}">Zur Kasse</a>
+								</li>
+							{% endif %}
+
+						</ul>
+					</nav>
+				</div>
+				<div class="header-action-items header-action-items1">
+					<div class="responsive-hamburger">
+						<div class="hamburger-1">
+							<a href="#" class="nav-menu-link">
+								<span class="dot1"></span>
+								<span class="dot2"></span>
+								<span class="dot3"></span>
+								<span class="dot4"></span>
+								<span class="dot5"></span>
+								<span class="dot6"></span>
+								<span class="dot7"></span>
+								<span class="dot8"></span>
+								<span class="dot9"></span>
+							</a>
+						</div>
+					</div>
+					<div class="right-side-customer">
+						<div class="search-part">
+							<div class="search-icon action-item icon">
+								<i class="rt-search"></i>
+							</div>
+							<div class="search-input-area">
+								<div class="container">
+									<div class="search-input-inner">
+										<div class="input-div">
+											<input id="searchInput1" class="search-input" type="text" placeholder="Search by keyword or #">
+										</div>
+										<div class="search-close-icon">
+											<i class="rt-xmark"></i>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<a href="{{ path('login') }}" class="account">
+							<i class="rt-user-2"></i>
+						</a>
+						<div class="cart action-item">
+							<div class="cart-nav">
+								<div class="cart-icon icon">
+									<a href="#0">
+										<i aria-hidden="true" class="fas fa-shopping-basket"></i>
+									</a>
+									<span class="cart-dot icon-dot">3</span>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="cart-bar">
+	<div class="cart-header">
+		<h3 class="cart-heading">MY CART (3 ITEMS)</h3>
+		<div class="close-cart">
+			<i class="fal fa-times"></i>
+		</div>
+	</div>
+	<div class="product-area">
+		<div class="product-item">
+			<div class="product-detail">
+				<div class="product-thumb"><img src="{{ asset('/assets/images/slider/image1.jpg') }}" alt="product-thumb"></div>
+				<div class="item-wrapper">
+					<span class="product-name">Parachute Jacket</span>
+					<div class="item-wrapper">
+						<span class="product-variation">
+							<span class="color">Green /</span>
+							<span class="size">XL</span>
+						</span>
+					</div>
+					<div class="item-wrapper">
+						<span class="product-qnty">3 ×</span>
+						<span class="product-price">$198.00</span>
+					</div>
+				</div>
+			</div>
+			<div class="cart-edit">
+				<div class="quantity-edit">
+					<button class="button">
+						<i class="fal fa-minus minus"></i>
+					</button>
+					<input type="text" class="input" value="3"/>
+					<button class="button plus">+<i class="fal fa-plus plus"></i>
+					</button>
+				</div>
+				<div class="item-wrapper d-flex mr--5 align-items-center">
+					<a href="#" class="product-edit">
+						<i class="fal fa-edit"></i>
+					</a>
+					<a href="#" class="delete-cart">
+						<i class="fal fa-times"></i>
+					</a>
+				</div>
+			</div>
+		</div>
+		<div class="product-item">
+			<div class="product-detail">
+				<div class="product-thumb"><img src="{{ asset('/assets/images/slider/image2.jpg') }}" alt="product-thumb"></div>
+				<div class="item-wrapper">
+					<span class="product-name">Narrow Trouser</span>
+					<div class="item-wrapper">
+						<span class="product-variation">
+							<span class="color">Green /</span>
+							<span class="size">XL</span>
+						</span>
+					</div>
+					<div class="item-wrapper">
+						<span class="product-qnty">2 ×</span>
+						<span class="product-price">$88.00</span>
+					</div>
+				</div>
+			</div>
+			<div class="cart-edit">
+				<div class="quantity-edit">
+					<button class="button">
+						<i class="fal fa-minus minus"></i>
+					</button>
+					<input type="text" class="input" value="2"/>
+					<button class="button plus">+<i class="fal fa-plus plus"></i>
+					</button>
+				</div>
+				<div class="item-wrapper d-flex mr--5 align-items-center">
+					<a href="#" class="product-edit">
+						<i class="fal fa-edit"></i>
+					</a>
+					<a href="#" class="delete-cart">
+						<i class="fal fa-times"></i>
+					</a>
+				</div>
+			</div>
+		</div>
+		<div class="product-item last-child">
+			<div class="product-detail">
+				<div class="product-thumb"><img src="{{ asset('/assets/images/slider/image5.jpg') }}" alt="product-thumb"></div>
+				<div class="item-wrapper">
+					<span class="product-name">Bellyless Hoodie</span>
+					<div class="item-wrapper">
+						<span class="product-variation">
+							<span class="color">Green /</span>
+							<span class="size">XL</span>
+						</span>
+					</div>
+					<div class="item-wrapper">
+						<span class="product-qnty">1 ×</span>
+						<span class="product-price">$289.00</span>
+					</div>
+				</div>
+			</div>
+			<div class="cart-edit">
+				<div class="quantity-edit">
+					<button class="button">
+						<i class="fal fa-minus minus"></i>
+					</button>
+					<input type="text" class="input" value="2"/>
+					<button class="button plus">+<i class="fal fa-plus plus"></i>
+					</button>
+				</div>
+				<div class="item-wrapper d-flex mr--5 align-items-center">
+					<a href="#" class="product-edit">
+						<i class="fal fa-edit"></i>
+					</a>
+					<a href="#" class="delete-cart">
+						<i class="fal fa-times"></i>
+					</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="cart-bottom-area">
+		<span class="spend-shipping">
+			<i class="fal fa-truck"></i>
+			SPENT
+			<span class="amount">$199.00</span>
+			MORE
+																																	                    FOR FREE SHIPPING</span>
+		<span class="total-price">TOTAL:
+			<span class="price">$556</span>
+		</span>
+		<a href="{{ path('checkOut') }}" class="checkout-btn cart-btn">PROCEED TO CHECKOUT</a>
+		<a href="{{ path('cart') }}" class="view-btn cart-btn">VIEW CART</a>
+	</div>
+</div>
+<!-- slide-bar start -->
+<aside class="slide-bar">
+	<div class="offset-sidebar">
+		<a class="hamburger-1 mobile-hamburger-1 ml--30" href="#">
+			<span>
+				<i class="rt-xmark"></i>
+			</span>
+		</a>
+	</div>
+	<!-- offset-sidebar start -->
+	<div class="offset-sidebar-main">
+		<div class="offset-widget mb-40">
+			<div class="info-widget">
+				<img src="{{ asset('assets/images/logo.png') }}" alt="CHEERCITY">
+				<p class="mb-30">
+					We must explain to you how all seds this mistakens idea denouncing pleasures and praising
+																																																							                            account.
+				</p>
+			</div>
+			<div class="info-widget info-widget2">
+				<h4 class="offset-title mb-20">Get In Touch
+				</h4>
+				<ul>
+					<li class="info phone">
+						<a href="tel:78090790890208806803">780 907 908 90, 208 806 803</a>
+					</li>
+					<li class="info email">
+						<a href="email:pixcelsthemes@gmail.com">pixcelsthemes@gmail.com</a>
+					</li>
+					<li class="info web">
+						<a href="www.webexample.com">www.webexample.com</a>
+					</li>
+					<li class="info location">13/A, New Pro State, NYC</li>
+				</ul>
+				<div class="offset-social-link">
+					<h4 class="offset-title mb-20">Follow Us
+					</h4>
+					<ul class="social-icon">
+						<li>
+							<a href="#">
+								<i class="fab fa-facebook-f"></i>
+							</a>
+						</li>
+						<li>
+							<a href="#">
+								<i class="fab fa-twitter"></i>
+							</a>
+						</li>
+						<li>
+							<a href="#">
+								<i class="fab fa-youtube"></i>
+							</a>
+						</li>
+						<li>
+							<a href="#">
+								<i class="fab fa-linkedin"></i>
+							</a>
+						</li>
+						<li>
+							<a href="#">
+								<i class="fab fa-behance"></i>
+							</a>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- offset-sidebar end -->
+	<!-- side-mobile-menu start -->
+	<nav class="side-mobile-menu side-mobile-menu1">
+		<ul
+			id="mobile-menu-active">
+			{# Wenn groupedTree vorhanden ist, nutze dieselbe Struktur für das mobile Menü #}
+			{% if analysis is defined and analysis.groupedTree is not empty %}
+				{% for cat00 in analysis.groupedTree %}
+					{% set cat00_link_mobile = cat00.link|default('#') %}
+					{% if cat00_link_mobile is not empty and cat00_link_mobile != '/' %}
+						<li class="has-dropdown firstlvl">
+							<a class="mm-link" href="{{ cat00_link_mobile }}">{{ cat00.value }}
+								<i class="rt-angle-down"></i>
+							</a>
+							{% if cat00.children is not empty %}
+								<ul class="sub-menu mega-dropdown-mobile">
+									{% for cat01 in cat00.children %}
+										{% set cat1_headline_link = cat01.link|default('#') %}
+										{% if cat1_headline_link is not empty and cat1_headline_link != '/' %}
+											<li class="mega-dropdown-li">
+												<ul class="mega-dropdown-ul mm-show">
+													<li class="dropdown-li headline mobile-headline">
+														<a class="dropdown-link mobile-headline-link" href="{{ cat1_headline_link }}" style="animation: none; transition: none; display:block; font-size:1.05rem; font-weight:700; padding-top:0.6rem; padding-bottom:0.4rem; border-top:1px solid #eee; margin-top:0.5rem;">
+															<strong>{{ cat01.value }}</strong>
+														</a>
+													</li>
+													{% if cat01.children is not empty %}
+														{% for cat02 in cat01.children %}
+															{% set cat02_link_mobile = cat02.link|default('#') %}
+															{% if cat02_link_mobile is not empty and cat02_link_mobile != '/' %}
+																<li class="dropdown-li">
+																	<a class="dropdown-link mobile-subitem" href="{{ cat02_link_mobile }}" style="display:block; padding-left:0.9rem; font-size:0.95rem;">{{ cat02.value }}</a>
+																</li>
+															{% endif %}
+														{% endfor %}
+													{% endif %}
+												</ul>
+											</li>
+										{% endif %}
+									{% endfor %}
+								</ul>
+							{% endif %}
+						</li>
+					{% endif %}
+				{% endfor %}
+			{% else %}
+				{# Fallback: original statisches mobile Menü #}
+				<li class="has-dropdown firstlvl">
+					<a class="mm-link" href="{{ path('shop') }}">Shop
+						<i class="rt-angle-down"></i>
+					</a>
+					<ul class="sub-menu mega-dropdown-mobile">
+						<li class="mega-dropdown-li">
+							<ul class="mega-dropdown-ul mm-show">
+								<li class="dropdown-li">
+									<a class="dropdown-link" href="{{ path('shop') }}">Shop</a>
+								</li>
+								<li class="dropdown-li">
+									<a class="dropdown-link" href="{{ path('sidebarLeft') }}">Left
+																																																																																																														                                                Sidebar
+																																																																																																														                                                Shop</a>
+								</li>
+								<li class="dropdown-li">
+									<a class="dropdown-link" href="{{ path('sidebarRight') }}">Right
+																																																																																																														                                                Sidebar
+																																																																																																														                                                Shop</a>
+								</li>
+								<li class="dropdown-li">
+									<a class="dropdown-link" href="{{ path('fullWidthShop') }}">Full
+																																																																																																														                                                Width Shop</a>
+								</li>
+							</ul>
+						</li>
+						<li class="mega-dropdown-li">
+							<ul class="mega-dropdown-ul mm-show">
+								<li class="dropdown-li">
+									<a class="dropdown-link" href="{{ path('productDetails') }}">Single
+																																																																																																														                                                Product
+																																																																																																														                                                Layout
+																																																																																																														                                                One</a>
+								</li>
+								<li class="dropdown-li">
+									<a class="dropdown-link" href="{{ path('productDetails2') }}">Single
+																																																																																																														                                                Product Layout
+																																																																																																														                                                Two</a>
+								</li>
+								<li class="dropdown-li">
+									<a class="dropdown-link" href="{{ path('variableProducts') }}">Variable Product</a>
+								</li>
+								<li class="dropdown-li">
+									<a class="dropdown-link" href="{{ path('groupedProducts') }}">Grouped Product</a>
+								</li>
+							</ul>
+						</li>
+						<li class="mega-dropdown-li">
+							<ul class="mega-dropdown-ul mm-show">
+								<li class="dropdown-li">
+									<a class="dropdown-link" href="{{ path('cart') }}">Cart
+									</a>
+								</li>
+								<li class="dropdown-li">
+									<a class="dropdown-link" href="{{ path('checkOut') }}">Checkout</a>
+								</li>
+								<li class="dropdown-li">
+									<a class="dropdown-link" href="{{ path('account') }}">My
+																																																																																																														                                                Account</a>
+								</li>
+							</ul>
+						</li>
+					</ul>
+				</li>
+				<li class="has-dropdown firstlvl">
+					<a class="mm-link" href="{{ path('index') }}">Pages
+						<i class="rt-angle-down"></i>
+					</a>
+					<ul class="sub-menu">
+						<li>
+							<a href="{{ path('about') }}">About</a>
+						</li>
+						<li>
+							<a href="{{ path('faq') }}">FAQ's</a>
+						</li>
+						<li>
+							<a href="{{ path('errorPage') }}">Error 404</a>
+						</li>
+					</ul>
+				</li>
+				<li class="has-dropdown firstlvl">
+					<a class="mm-link" href="{{ path('news') }}">Blog
+						<i class="rt-angle-down"></i>
+					</a>
+					<ul class="sub-menu">
+						<li>
+							<a href="{{ path('news') }}">Blog</a>
+						</li>
+						<li>
+							<a href="{{ path('newsGrid') }}">Blog Grid</a>
+						</li>
+						<li>
+							<a href="{{ path('newsDetails') }}">Blog Details</a>
+						</li>
+					</ul>
+				</li>
+				<li>
+					<a class="mm-link" href="{{ path('contact') }}">Contact</a>
+				</li>
+			{% endif %}
+		</ul>
+	</nav>
+	<div class="header-action-items header-action-items1 header-action-items-side">
+		<div class="search-part">
+			<div class="search-icon action-item icon">
+				<i class="rt-search"></i>
+			</div>
+			<div class="search-input-area">
+				<div class="container">
+					<div class="search-input-inner">
+						<select id="custom-select">
+							<option value="hide">All Catagory</option>
+							<option value="all">All</option>
+							<option value="men">Men</option>
+							<option value="women">Women</option>
+							<option value="shoes">Shoes</option>
+							<option value="shoes">Glasses</option>
+							<option value="shoes">Bags</option>
+							<option value="shoes">Assesories</option>
+						</select>
+						<div class="input-div">
+							<div class="search-input-icon">
+								<i class="rt-search mr--10"></i>
+							</div>
+							<input class="search-input" type="text" placeholder="Search by keyword or #">
+						</div>
+						<div class="search-close-icon">
+							<i class="rt-xmark"></i>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="cart action-item">
+			<div class="cart-nav">
+				<div class="cart-icon icon">
+					<i class="rt-cart"></i>
+					<span class="cart-dot icon-dot">3</span>
+				</div>
+			</div>
+		</div>
+				<span class="cart-dot icon-dot">0</span>
+			</div>
+		</div>
+		<a href="{{ path('login') }}" class="account">
+			<i class="rt-user-2"></i>
+		</a>
+	</div>
+	<!-- side-mobile-menu end -->
+</aside></header><!-- ..::Header Section End Here::.. -->{% if show_dev is defined and show_dev %}
+<style>
+	.dev-debug-toggle {
+		background: #24292e;
+		color: #fff;
+		border: 0;
+		padding: 6px 10px;
+		margin: 6px;
+		border-radius: 3px;
+		font-size: 0.85rem;
+		cursor: pointer
+	}
+	.dev-debug-pre {
+		font-size: 0.85rem;
+		line-height: 1.3;
+	}
+	.dev-debug-fixed {
+		position: fixed;
+		right: 1rem;
+		bottom: 1rem;
+		z-index: 9999;
+	}
+	.dev-debug-panel {
+		position: fixed;
+		right: 1rem;
+		bottom: 1rem;
+		z-index: 10000;
+		background: rgba(0, 0, 0, 0.7);
+		color: #fff;
+		padding: 8px;
+		border-radius: 6px;
+		display: flex;
+		gap: 6px;
+		align-items: center
+	}
+	.dev-debug-panel .info {
+		font-size: 0.8rem;
+		opacity: 0.9;
+		margin-left: 6px
+	}
+</style>
+<script>
+	(function () {
+function togglePre(pre) {
+if (! pre) 
+return false;
+
+
+
+pre.style.display = (pre.style.display === 'block') ? 'none' : 'block';
+return true;
+}
+
+function ensureMessagePre(id, message) {
+var pre = document.getElementById(id);
+if (pre) 
+return pre;
+
+
+
+pre = document.createElement('pre');
+pre.id = id;
+pre.className = 'dev-debug-pre';
+pre.style = 'display:block; white-space:pre-wrap; max-height:30vh; overflow:auto; background:#f6f8fa; padding:0.5rem; border:1px solid #ddd; color:#000;';
+pre.textContent = message;
+document.body.appendChild(pre);
+return pre;
+}
+
+function init() { // floating panel (always visible when show_dev)
+var panel = document.createElement('div');
+panel.className = 'dev-debug-panel';
+panel.setAttribute('role', 'region');
+panel.setAttribute('aria-label', 'Dev debug panel');
+
+var btnNav = document.createElement('button');
+btnNav.className = 'dev-debug-toggle';
+btnNav.textContent = 'Nav JSON';
+btnNav.type = 'button';
+btnNav.tabIndex = 0;
+panel.appendChild(btnNav);
+
+var btnProd = document.createElement('button');
+btnProd.className = 'dev-debug-toggle';
+btnProd.textContent = 'Products JSON';
+btnProd.type = 'button';
+btnProd.tabIndex = 0;
+panel.appendChild(btnProd);
+
+var info = document.createElement('span');
+info.className = 'info';
+info.textContent = 'dev mode';
+panel.appendChild(info);
+
+document.body.appendChild(panel);
+
+// Expose a global function so clicks work even if addEventListener is blocked
+window.__devToggle = function (id) {
+var pre = document.getElementById(id);
+if (! togglePre(pre)) {
+if (id === 'devNavDebugJson') {
+ensureMessagePre(id, 'No nav debug data (analysis.groupedTree missing or empty). Use the debug commands or ensure the controller provides analysis.groupedTree.');
+} else {
+ensureMessagePre(id, 'No products debug data (analysis.products / categoryProducts / items missing or empty).');
+}
+}
+};
+
+// Prefer addEventListener but also set onclick to the global function for robustness
+try {
+btnNav.addEventListener('click', function () {
+window.__devToggle('devNavDebugJson');
+});
+} catch (e) {}
+try {
+btnProd.addEventListener('click', function () {
+window.__devToggle('devProductsDebugJson');
+});
+} catch (e) {}
+
+// Ensure onclick attributes exist (works even when addEventListener is disabled)
+btnNav.setAttribute('onclick', "window.__devToggle('devNavDebugJson')");
+btnProd.setAttribute('onclick', "window.__devToggle('devProductsDebugJson')");
+}
+
+if (document.readyState === 'loading') {
+document.addEventListener('DOMContentLoaded', init);
+} else {
+init();
+}
+})();
+</script>{% endif %}

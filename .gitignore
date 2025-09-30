@@ -8,3 +8,16 @@
 /var/
 /vendor/
 ###< symfony/framework-bundle ###
+
+###> friendsofphp/php-cs-fixer ###
+/.php-cs-fixer.php
+/.php-cs-fixer.cache
+###< friendsofphp/php-cs-fixer ###
+node_modules
+
+# Additional ignore rules
+/vendor/
+/public/assets/images/
+
+# Ignore image assets
+/public/assets/images

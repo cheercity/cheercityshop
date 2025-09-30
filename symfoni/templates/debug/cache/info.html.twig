@@ -1,0 +1,248 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Cache Informationen - {{ parent() }}{% endblock %}
+
+{% block body %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">
+                        <i class="fas fa-info-circle text-info me-2"></i>
+                        Cache Informationen
+                    </h4>
+                    <div>
+                        {# (2) Buttons mit Optionen #}
+                        <div class="btn-group me-2" role="group">
+                            <a href="{{ path('debug_cache_clear') }}" class="btn btn-outline-danger">
+                                <i class="fas fa-trash me-1"></i>
+                                Clear
+                            </a>
+                            <a href="{{ path('debug_cache_clear', {warmup: 1}) }}" class="btn btn-outline-success">
+                                <i class="fas fa-fire me-1"></i>
+                                Clear + Warmup
+                            </a>
+                        </div>
+                        <a href="{{ path('debug_index') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-1"></i>
+                            Debug Center
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if cache_clear_results is not null %}
+                        <div class="alert {% if cache_clear_success %}alert-success{% else %}alert-danger{% endif %}">
+                            <strong>Letzter Cache-Lauf:</strong>
+                            <ul class="small mb-0 mt-2">
+                                {% for line in cache_clear_results %}
+                                    <li><code>{{ line }}</code></li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
+
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header bg-primary text-white">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-cog me-2"></i>
+                                        System-Informationen
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <table class="table table-borderless">
+                                        <tr>
+                                            <td><strong>Umgebung:</strong></td>
+                                            <td>
+                                                <span class="badge {% if info.environment == 'prod' %}bg-success{% elseif info.environment == 'dev' %}bg-warning{% else %}bg-info{% endif %}">
+                                                    {{ info.environment|upper }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Debug-Modus:</strong></td>
+                                            <td>
+                                                {% if info.debug %}
+                                                    <span class="badge bg-warning">AN</span>
+                                                {% else %}
+                                                    <span class="badge bg-success">AUS</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Aktueller Zeitpunkt:</strong></td>
+                                            <td>{{ "now"|date("d.m.Y H:i:s") }}</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header bg-success text-white">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-chart-pie me-2"></i>
+                                        Cache-Übersicht
+                                    </h5>
+                                </div>
+                                <div class="card-body text-center">
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <h6>Aktueller Cache</h6>
+                                            <div class="display-6 {% if info.current_cache.exists %}text-success{% else %}text-muted{% endif %}">
+                                                {{ info.current_cache.size }}
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <h6>Var Cache</h6>
+                                            <div class="display-6 {% if info.var_cache.exists %}text-info{% else %}text-muted{% endif %}">
+                                                {{ info.var_cache.size }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-folder me-2"></i>
+                                        Aktueller Cache
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <table class="table table-sm">
+                                        <tr>
+                                            <td><strong>Pfad:</strong></td>
+                                            <td><code>{{ info.current_cache.path }}</code></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Status:</strong></td>
+                                            <td>
+                                                {% if info.current_cache.exists %}
+                                                    <span class="badge bg-success">Existiert</span>
+                                                {% else %}
+                                                    <span class="badge bg-secondary">Nicht vorhanden</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Größe:</strong></td>
+                                            <td>{{ info.current_cache.size }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Schreibbar:</strong></td>
+                                            <td>
+                                                {% if info.current_cache.writable %}
+                                                    <span class="badge bg-success">Ja</span>
+                                                {% else %}
+                                                    <span class="badge bg-danger">Nein</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-folder-open me-2"></i>
+                                        Var Cache
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <table class="table table-sm">
+                                        <tr>
+                                            <td><strong>Pfad:</strong></td>
+                                            <td><code>{{ info.var_cache.path }}</code></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Status:</strong></td>
+                                            <td>
+                                                {% if info.var_cache.exists %}
+                                                    <span class="badge bg-success">Existiert</span>
+                                                {% else %}
+                                                    <span class="badge bg-secondary">Nicht vorhanden</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Größe:</strong></td>
+                                            <td>{{ info.var_cache.size }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Schreibbar:</strong></td>
+                                            <td>
+                                                {% if info.var_cache.writable %}
+                                                    <span class="badge bg-success">Ja</span>
+                                                {% else %}
+                                                    <span class="badge bg-danger">Nein</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="card bg-light text-center">
+                                    <div class="card-body">
+                                        <i class="fas fa-trash fa-2x text-danger mb-2"></i>
+                                        <h6>Cache leeren</h6>
+                                        <div class="btn-group">
+                                            <a href="{{ path('debug_cache_clear') }}" class="btn btn-danger btn-sm">
+                                                <i class="fas fa-trash me-1"></i>
+                                                Leeren
+                                            </a>
+                                            <a href="{{ path('debug_cache_clear', { warmup: 1 }) }}" class="btn btn-warning btn-sm">
+                                                <i class="fas fa-bolt me-1"></i>
+                                                Leeren+Warmup
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card bg-light text-center">
+                                    <div class="card-body">
+                                        <i class="fas fa-sync-alt fa-2x text-primary mb-2"></i>
+                                        <h6>Seite aktualisieren</h6>
+                                        <button onclick="location.reload()" class="btn btn-primary btn-sm">
+                                            <i class="fas fa-refresh me-1"></i>
+                                            Neu laden
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card bg-light text-center">
+                                    <div class="card-body">
+                                        <i class="fas fa-home fa-2x text-success mb-2"></i>
+                                        <h6>Zur Startseite</h6>
+                                        <a href="{{ path('home') }}" class="btn btn-success btn-sm">
+                                            <i class="fas fa-home me-1"></i>
+                                            Startseite
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

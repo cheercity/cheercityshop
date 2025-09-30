@@ -1,0 +1,11 @@
+# Prod-only service overrides
+# Alias the main application cache to the tuned pool so the whole app uses the
+# tuned settings without redefining reserved pool names in framework config.
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+
+  # Alias the default app cache to our tuned pool implementation available as
+  # the `cache.app.tuned` pool defined in config/packages/prod/cache_advanced.yaml
+  cache.app: '@cache.app.tuned'

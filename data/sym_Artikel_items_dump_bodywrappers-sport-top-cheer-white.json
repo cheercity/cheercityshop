@@ -1,0 +1,107 @@
+[
+    {
+        "recID": 791,
+        "FarbCode_1_descr": "Black",
+        "SizeCode_descr": "XS",
+        "Online_Bestand": 0,
+        "Online_Lieferzeit": "unter Vorbehalt",
+        "images": [
+            {
+                "SKU_ArtikelGruppe": "0331",
+                "Image_file_1500px": "1500px_0331_0209_1.jpg"
+            },
+            {
+                "SKU_ArtikelGruppe": "0331",
+                "Image_file_1500px": "1500px_0331_0209_2.jpg"
+            },
+            {
+                "SKU_ArtikelGruppe": "0331",
+                "Image_file_1500px": "1500px_0331_0209_3.jpg"
+            }
+        ]
+    },
+    {
+        "recID": 792,
+        "FarbCode_1_descr": "Black",
+        "SizeCode_descr": "XL",
+        "Online_Bestand": 0,
+        "Online_Lieferzeit": "unter Vorbehalt",
+        "images": [
+            {
+                "SKU_ArtikelGruppe": "0331",
+                "Image_file_1500px": "1500px_0331_0209_1.jpg"
+            },
+            {
+                "SKU_ArtikelGruppe": "0331",
+                "Image_file_1500px": "1500px_0331_0209_2.jpg"
+            },
+            {
+                "SKU_ArtikelGruppe": "0331",
+                "Image_file_1500px": "1500px_0331_0209_3.jpg"
+            }
+        ]
+    },
+    {
+        "recID": 793,
+        "FarbCode_1_descr": "Black",
+        "SizeCode_descr": "S",
+        "Online_Bestand": 0,
+        "Online_Lieferzeit": "unter Vorbehalt",
+        "images": [
+            {
+                "SKU_ArtikelGruppe": "0331",
+                "Image_file_1500px": "1500px_0331_0209_1.jpg"
+            },
+            {
+                "SKU_ArtikelGruppe": "0331",
+                "Image_file_1500px": "1500px_0331_0209_2.jpg"
+            },
+            {
+                "SKU_ArtikelGruppe": "0331",
+                "Image_file_1500px": "1500px_0331_0209_3.jpg"
+            }
+        ]
+    },
+    {
+        "recID": 794,
+        "FarbCode_1_descr": "Black",
+        "SizeCode_descr": "M",
+        "Online_Bestand": -1,
+        "Online_Lieferzeit": "unter Vorbehalt",
+        "images": [
+            {
+                "SKU_ArtikelGruppe": "0331",
+                "Image_file_1500px": "1500px_0331_0209_1.jpg"
+            },
+            {
+                "SKU_ArtikelGruppe": "0331",
+                "Image_file_1500px": "1500px_0331_0209_2.jpg"
+            },
+            {
+                "SKU_ArtikelGruppe": "0331",
+                "Image_file_1500px": "1500px_0331_0209_3.jpg"
+            }
+        ]
+    },
+    {
+        "recID": 795,
+        "FarbCode_1_descr": "Black",
+        "SizeCode_descr": "L",
+        "Online_Bestand": 0,
+        "Online_Lieferzeit": "unter Vorbehalt",
+        "images": [
+            {
+                "SKU_ArtikelGruppe": "0331",
+                "Image_file_1500px": "1500px_0331_0209_1.jpg"
+            },
+            {
+                "SKU_ArtikelGruppe": "0331",
+                "Image_file_1500px": "1500px_0331_0209_2.jpg"
+            },
+            {
+                "SKU_ArtikelGruppe": "0331",
+                "Image_file_1500px": "1500px_0331_0209_3.jpg"
+            }
+        ]
+    }
+]

@@ -1,0 +1,51 @@
+{% extends 'base.html.twig' %}
+{% block title %}Runtime Debug{% endblock %}
+{% block body %}
+<div class="container" style="max-width:1200px; margin:2rem auto; font-family: system-ui, Arial, sans-serif;">
+    <h1>Runtime Debug <small style="font-size:0.6em; font-weight:normal;">ENV: {{ environment }}</small></h1>
+    <p>Query Steuerung: <code>?only=session</code> | <code>?show=cart</code> | <code>?hide=customer</code> | JSON: <code>?format=json</code></p>
+    <hr>
+    {% if panels is empty %}
+        <div class="alert alert-warning">Keine aktiven Panels.</div>
+    {% endif %}
+    <div class="panels" style="display:grid; gap:1rem; grid-template-columns: repeat(auto-fill,minmax(300px,1fr));">
+        {% for key, panel in panels %}
+            <div style="border:1px solid #ddd; border-radius:8px; padding:1rem; background:#fafafa;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <h3 style="margin:0; font-size:1.1rem;">{{ panel.label }} <small style="color:#666;">({{ key }})</small></h3>
+                    <a href="{{ path('debug_runtime_panel', {key:key}) }}?format=json" style="font-size:0.75rem;">JSON</a>
+                </div>
+                <details style="margin-top:0.5rem;" open>
+                    <summary style="cursor:pointer;">Inhalt</summary>
+                    <pre style="font-size:0.7rem; background:#272822; color:#eee; padding:0.5rem; overflow:auto; max-height:300px;">{{ panel.result|json_encode(constant('JSON_PRETTY_PRINT')) }}</pre>
+                </details>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{# Hard-wired console output for runtime debug (requested) #}
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+    (function(){
+        try {
+            const data = {{ {'environment': environment, 'panels': panels}|json_encode(constant('JSON_UNESCAPED_SLASHES'))|raw }};
+            if (window && window.console) {
+                console.group('%cRuntime Debug','background:#222;color:#0f0;padding:2px 6px;border-radius:3px');
+                console.log('Environment:', data.environment);
+                if (data.panels) {
+                    Object.entries(data.panels).forEach(([key, panel]) => {
+                        console.group(`Panel: ${key} (${panel.label||''})`);
+                        console.dir(panel.result);
+                        console.groupEnd();
+                    });
+                }
+                console.groupEnd();
+                window.RUNTIME_DEBUG = data; // expose globally
+            }
+        } catch(e) { console.warn('Runtime debug console output failed', e); }
+    })();
+    </script>
+{% endblock %}

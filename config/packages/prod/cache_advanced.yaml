@@ -1,0 +1,31 @@
+### Advanced cache tuning for production
+# This file provides a stable namespace (prefix_seed) and a tuned Redis pool
+# you can use for application-level caching (e.g. FileMaker token). It does
+# not forcibly replace `cache.app` but provides a ready pool and recommended
+# settings. To actually use this pool as the main app cache, either rename the
+# pool to the `cache.app` service in DI or update `framework.cache.app` to
+# `cache.adapter.redis` and `default_redis_provider` (already set in cache.yaml).
+
+framework:
+    cache:
+        # Stable namespace so cache keys don't collide between apps/environments.
+        # Using kernel.environment keeps prod/dev namespaces separate.
+        prefix_seed: 'cheercity_app_%kernel.environment%'
+
+        # Redis provider is read from REDIS_URL env var (set in .env.local / env)
+        default_redis_provider: '%env(REDIS_URL)%'
+
+        pools:
+            # Tuned pool for application-level items (e.g. FileMaker token)
+            # TTL (default_lifetime) controls how long items live in seconds.
+            cache.app.tuned:
+                adapter: cache.adapter.redis
+                provider: '%env(REDIS_URL)%'
+                default_lifetime: 1800 # 30 minutes; adjust to your token lifetime
+
+                # You can enable tags if you need to clear groups of items:
+                # tags: true
+
+                # If you prefer a different serializer, configure it in your
+                # Redis client or via a custom service/wrapper. Symfony's
+                # RedisAdapter will serialize values using PHP by default.
